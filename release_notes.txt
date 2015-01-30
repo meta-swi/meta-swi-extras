@@ -1,0 +1,68 @@
+Release Notes for SWI BSPs
+
+
+Source Code
+===========
+
+All source code released by wrlinux are located in github:
+
+ - meta-swi: meta layers for SWI BSPs
+
+https://github.com/MalvernPark/meta-swi.git
+
+ - meta-swi-extras: extra packages
+
+https://github.com/MalvernPark/meta-swi-extras.git
+
+ - linux-yocto-3.4: yocto kernel tree
+
+https://github.com/MalvernPark/linux-yocto-3.4.git
+
+Please use git to clone above trees and read meta-swi-extras/README.build file
+to see how to build rootfs and kernel.
+
+
+Release Notes
+=============
+02/26/2014 v1.2
+
+  - For mdm9x15 BSP:
+    * Updated proprietary libraries
+    * Updated Test report for Yocto 1.4 BSP
+    * Added updated SWI initscrips package
+    * Added the following test suites: ltp, lmbench, iperf, e2fsprogs, open-posix 
+    * Fixed dropbear download issue
+    * Updated SPI and I2C test modules
+    * Fixed init changing the console atributes
+    * Added more options for busybox ps and busybox head
+    * Various startup errors fixed
+    * Kernel:
+              * Integrated Sierra Wireless specific changes
+                Extracted from Sierra Wireless code release 06.00.01A
+              * Added timpani-audio header
+              * Hsic: override enable HSIC flag provided by boottoapp
+              * Fixed Media1 no valid playback route from source to sink
+              * Fixed WM8940 playback issue
+
+  - For swi-s6 BSP:
+    * Updated I2C Slave test
+    * Updated test report for Yocto 1.4 BSP
+    * Updated GPIO test module by adding LEVEL feature 
+    * Added FSB bootloader to configure the following PINs as GPIOs: 94, 95, 96 & 97.
+    * Updated keypad_test
+    * Added  mtd-utils package to fix flashcp printout percentage.
+
+
+10/25/2013 v1.1
+
+  - For swi-s6 BSP:
+    * Fix wrong i2c kernel config and related testcases
+    * Change wrong message from "TMU" to "ADC" for ADC driver
+    * Correct errors of uart testcases
+
+9/27/2013 v1.0
+
+  - Initial support for swi-s6 and swi-mdm9x15 BSPs.
+  - For which features supported in each BSP, please refer to README.bsp file
+    in meta-swi/meta-<BSP>/ directory.
+  - The test reports are located in meta-swi-extras/ and filled in *.xls file.

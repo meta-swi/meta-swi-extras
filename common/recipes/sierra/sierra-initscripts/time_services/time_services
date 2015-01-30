@@ -1,0 +1,51 @@
+#!/bin/sh
+
+# check for configuration file
+[ -f /etc/time_service.conf ] && . /etc/time_service.conf
+
+RETVAL=0
+service="time service"
+
+start() {
+    # I need to start whatever is configured.
+    echo $"Starting $TIME_SERVICES:"
+    for s in $TIME_SERVICES; do
+        case $s in
+        qcom_time)
+            echo "starting time-daemon"
+            /etc/init.d/time_serviced start
+            ;;
+        ntpd_time)
+            echo "starting ntpd"
+            /etc/init.d/ntpd_time_service start
+            ;;
+        esac
+    done
+    RETVAL=$?
+}
+
+stop() {
+    # I don't know what was configured so I need to try stopping everything.
+    echo "stopping time daemon"
+    /etc/init.d/time_serviced stop
+    echo "stopping ntpd"
+    /etc/init.d/ntpd_time_service stop
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|restart}"
+        RETVAL=1
+esac
+exit $RETVAL
+

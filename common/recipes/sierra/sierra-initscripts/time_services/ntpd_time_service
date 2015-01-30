@@ -1,0 +1,86 @@
+#! /bin/sh
+
+# This script may be called from if_up/down and rcX.d startup
+# If no network is up do nothing as there is no point.
+
+[ -f /etc/time_service.conf ] && . /etc/time_service.conf
+
+RETVAL=0
+
+network() {
+    RET=1
+    link_states=$(ip -o link | awk '{print $9}')
+    for state in $link_states
+    do
+        if [ "x$state" = "xUP" ]; then
+            RET=0
+            break
+        fi
+    done
+    return $RET
+}
+
+getGateway() {
+    net=$(setNet show)
+    for line in $net; do
+        case $line in
+            gway=*) IFS='=' read name gway <<EOF
+                $line
+EOF
+                echo $gway
+        esac
+    done
+}
+
+opts=""
+servers=""
+start() {
+    if network; then
+        if [ "$NTPD_ONESHOT" = "y" ]; then
+            opts+=" -q"
+        fi
+        if [ "$NTPD_SERVERS" ]; then
+            for s in $NTPD_SERVERS; do
+                servers+=" -p $s"
+            done
+        fi
+        if [ "$NTPD_USE_GATEWAY" = "y" ]; then
+            servers+=" -p $(getGateway)"
+        fi
+        if [ "$NTPD_USE_DNS_SERVERS" ]; then
+            if [ -f /etc/resolv.conf ]; then
+                servers+="$(awk '$1~/nameserver/{printf " -p "$2}' /etc/resolv.conf)"
+            fi
+        fi
+        if [ "$servers" ]; then
+            start-stop-daemon -S -x ntpd -- $opts $servers
+            RETVAL=$?
+        else
+            echo "No servers specified for ntpd. Not starting"
+            RETVAL=1
+        fi
+    fi
+}
+
+stop() {
+    start-stop-daemon -K -x ntpd
+    RETVAL=$?
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|restart}"
+        RETVAL=1
+esac
+exit $RETVAL
+
