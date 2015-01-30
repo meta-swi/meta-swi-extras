@@ -1,15 +1,16 @@
 # Sierra toolchain
 SIERRA_VARIANT = "ext"
 
-TOOLCHAIN_TARGET_TASK = "packagegroup-core-standalone-sdk-target packagegroup-core-standalone-sdk-target-dbg packagegroup-swi-${SIERRA_VARIANT}-toolchain-target"
+require recipes-core/meta/meta-toolchain.bb
+
+TOOLCHAIN_HOST_TASK += "nativesdk-packagegroup-swi-${SIERRA_VARIANT}-toolchain"
+TOOLCHAIN_TARGET_TASK += "packagegroup-swi-${SIERRA_VARIANT}-toolchain-target"
 TOOLCHAIN_OUTPUTNAME = "${SDK_NAME}-toolchain-swi-${SIERRA_VARIANT}-${DISTRO_VERSION}"
 
 SDK_PACKAGING_FUNC_ORIG = "create_shar"
 SDK_PACKAGING_FUNC = "create_pkgs"
 
 SDK_PACKAGING_FUNC = "create_sdk_pkgs"
-
-require recipes-core/meta/meta-toolchain.bb
 
 repack_tarball() {
     TARBALL_BZ="${SDK_DEPLOY}/${TOOLCHAIN_OUTPUTNAME}.tar.bz2"

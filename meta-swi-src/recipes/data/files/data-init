@@ -1,0 +1,17 @@
+#! /bin/sh
+
+#Copyright (c) 2012 QUALCOMM Incorporated.  All Rights Reserved.
+#QUALCOMM Proprietary and Confidential.
+
+#The init script sets the following procfs entry to 1
+#/proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal
+#to prevent out of order acknowledgements from making
+#connection tracking to treat them as not belonging to
+#the connection they belong to. Otherwise, a weird issue
+#happens in which some long connections on high-throughput
+#links get dropped when an ack packet comes out of order.
+
+f=/proc/sys/net/netfilter/nf_conntrack_tcp_be_liberal
+# FIXME: Avoid unnecessary error printing for now. This will
+# be valid only if netfilter connection tracking is enabled.
+if [ -e ${f} ] ; then echo 1 > ${f} ; fi

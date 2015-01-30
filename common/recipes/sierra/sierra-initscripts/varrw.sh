@@ -2,6 +2,9 @@
 # Copyright (c) 2012 Sierra Wireless
 #
 
+# DM, FIXME: We probably do not need this.
+exit 0
+
 # use /home as a temporary mount point
 TEMP_DIR="/home"
 

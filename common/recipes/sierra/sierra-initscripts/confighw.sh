@@ -20,10 +20,20 @@ if [ t${TYPE} = 't08' ]; then
 	modprobe spi_qsd
 	modprobe sh1106
 fi
-# WP710x devices detected
-if [ t${TYPE} = 't09' ] || [ t${TYPE} = 't0A' ] || [ t${TYPE} = 't0B' ] || [ t${TYPE} = 't1C' ] || [ t${TYPE} = 't1D' ] || [ t${TYPE} = 't1E' ] ; then
-  # LDO5 is needed for UART2
-  LDO5VAL=1
+
+# Avoid unnecessary error printing
+if [ -e "/sys/module/kernel/parameters/ldo5" ]; then
+	# WP710x devices detected
+	if [ t${TYPE} = 't09' ] || [ t${TYPE} = 't0A' ] || [ t${TYPE} = 't0B' ] || [ t${TYPE} = 't1C' ] || [ t${TYPE} = 't1D' ] || [ t${TYPE} = 't1E' ] ; then
+		# LDO5 is needed for UART2
+		LDO5VAL=1
+	fi
+
+	echo ${LDO5VAL} > /sys/module/kernel/parameters/ldo5
 fi
 
-echo ${LDO5VAL} > /sys/module/kernel/parameters/ldo5
+# Provide helper to access tty for AT
+if [ -e "/dev/smd8" ] && ! [ -e "/dev/ttyAT" ]; then
+	ln -s "/dev/smd8" "/dev/ttyAT"
+fi
+

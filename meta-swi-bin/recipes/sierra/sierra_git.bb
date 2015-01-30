@@ -23,6 +23,13 @@ USERRW_MOUNTPOINT = "/mnt/userrw"
 PERSIST_MOUNTPOINT = "/mnt/persist"
 # Flash mountpoint is for the large flash partition
 FLASH_MOUNTPOINT = "/mnt/flash"
+# Extra flash mount point for misc flash use (e.g. mounting user0 partition).
+FLASH_MOUNTPOINT_LEGATO = "/mnt/legato"
+# Required by some
+DATA_DIR = "/data"
+# Legato currently installs in opt with libs in /usr/local
+LEGATO_MOUNTPOINT = "/opt"
+LEGATO_LIBS = "/usr/local"
 
 # Tell bitbake that we built another packages as well
 # .. and assign files to these packages
@@ -38,6 +45,10 @@ do_install_append() {
     install -m 0755 -d ${D}${USERRW_MOUNTPOINT}
     install -m 0755 -d ${D}${PERSIST_MOUNTPOINT}
     install -m 0755 -d ${D}${FLASH_MOUNTPOINT}
+    install -m 0755 -d ${D}${FLASH_MOUNTPOINT_LEGATO}
+    install -m 0755 -d ${D}${DATA_DIR}
+    install -m 0755 -d ${D}${LEGATO_MOUNTPOINT}
+    install -m 0755 -d ${D}${LEGATO_LIBS}
     cp -R --preserve=links ${S}/usr ${D}
 
     # add audio files to rootfs
@@ -50,6 +61,10 @@ FILES_${PN} += " \
                ${USERRW_MOUNTPOINT} \
                ${PERSIST_MOUNTPOINT} \
                ${FLASH_MOUNTPOINT} \
+               ${FLASH_MOUNTPOINT_LEGATO} \
+               ${DATA_DIR} \
+               ${LEGATO_MOUNTPOINT} \
+               ${LEGATO_LIBS} \
                /data/ring.wav \
                /usr/sbin/audio_player.sh \
                "

@@ -17,7 +17,7 @@ SRC_URI = "file://mbim-bin.tar.bz2"
 S = "${WORKDIR}/mbim-bin"
 
 INITSCRIPT_NAME = "mbim"
-INITSCRIPT_PARAMS = "start 45 2 3 4 5 . stop 70 0 1 6 ."
+INITSCRIPT_PARAMS = "start 45 S . stop 55 S ."
 
 inherit update-rc.d
 

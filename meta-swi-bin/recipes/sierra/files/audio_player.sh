@@ -9,7 +9,11 @@ fname="$2";
 if [ "$action" = "audio" ]
   then
       echo "Starting aplay audio file: "
+      if [ -n "$(echo ${fname} | grep "mp3")" ]; then
+      aplay -T MP3 $fname
+      else
       aplay $fname
+      fi
 fi
 
 if [ "$action" = "dtmf" ]

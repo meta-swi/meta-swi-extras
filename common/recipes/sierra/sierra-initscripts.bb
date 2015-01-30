@@ -3,8 +3,6 @@ HOMEPAGE = "http://www.sierrawireless.com"
 LICENSE = "SierraWireless-Proprietary"
 LIC_FILES_CHKSUM = "file://../swiapplaunch.sh;startline=2;endline=2;md5=22dcb8c37cc7ca6b4aad807c89ffc0d5"
 
-DEPENDS = "sierra"
-
 SRC_URI = "file://confighw.sh \
            file://swiapplaunch.sh \
            file://varrw.sh \
@@ -14,22 +12,14 @@ SRC_URI = "file://confighw.sh \
            file://run.env \
            file://run_getty.sh \
            file://enable_autosleep.sh \
-           file://time_services/time_services \
-           file://time_services/ntpd_time_service \
-           file://time_services/ntpd_start \
-           file://time_services/ntpd_stop \
-           file://time_services/time_service.conf \
+           file://mount_unionfs \
+           file://mount_early \
           "
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
-do_configure() {
-    :
-}
-
-do_compile() {
-    :
-}
+do_configure[noexec] = "1"
+do_compile[noexec] = "1"
 
 do_install() {
     install -m 0755 ${WORKDIR}/confighw.sh -D ${D}${sysconfdir}/init.d/confighw.sh
@@ -41,23 +31,22 @@ do_install() {
     install -m 0444 ${WORKDIR}/run.env -D ${D}${sysconfdir}/run.env
     install -m 0755 ${WORKDIR}/run_getty.sh -D ${D}${sysconfdir}/init.d/run_getty.sh
     install -m 0755 ${WORKDIR}/enable_autosleep.sh -D ${D}${sysconfdir}/init.d/enable_autosleep.sh
-    install -D -m 0755 ${WORKDIR}/time_services/time_services -D ${D}${sysconfdir}/init.d/time_services
-    install -D -m 0755 ${WORKDIR}/time_services/ntpd_time_service -D ${D}${sysconfdir}/init.d/ntpd_time_service
-    install -D -m 0755 ${WORKDIR}/time_services/ntpd_stop -D ${D}${sysconfdir}/network/if-down.d/ntpd_stop
-    install -D -m 0755 ${WORKDIR}/time_services/ntpd_start -D ${D}${sysconfdir}/network/if-up.d/ntpd_start
-    install -D -m 0644 ${WORKDIR}/time_services/time_service.conf -D ${D}${sysconfdir}/etc/time_service.conf
+    install -D -m 0755 ${WORKDIR}/mount_unionfs -D ${D}${sysconfdir}/init.d/mount_unionfs
+    install -D -m 0755 ${WORKDIR}/mount_early -D ${D}${sysconfdir}/init.d/mount_early
 
     [ -n "${D}" ] && OPT="-r ${D}" || OPT="-s"
+    update-rc.d $OPT -f mount_early remove
+    update-rc.d $OPT mount_early start 02 S . stop 98 S .
     update-rc.d $OPT -f confighw.sh remove
-    update-rc.d $OPT confighw.sh start 02 S 2 3 4 5 . stop 98 0 1 6 .
+    update-rc.d $OPT confighw.sh start 03 S .
+    update-rc.d $OPT -f mount_unionfs remove
+    update-rc.d $OPT mount_unionfs start 04 S . stop 96 S .
     update-rc.d $OPT -f swiapplaunch.sh remove
-    update-rc.d $OPT swiapplaunch.sh start 90 2 3 4 5 . stop 02 S 0 1 6 .
+    update-rc.d $OPT swiapplaunch.sh start 90 S . stop 02 S .
     update-rc.d $OPT -f varrw.sh remove
-    update-rc.d $OPT varrw.sh start 36 S . stop 99 0 6 .
+    update-rc.d $OPT varrw.sh start 36 S . stop 99 S .
     update-rc.d $OPT -f start_dbi_daemon remove
-    update-rc.d $OPT start_dbi_daemon start 99 2 3 4 5 . stop 80 0 1 6 .
+    update-rc.d $OPT start_dbi_daemon start 99 S . stop 80 S .
     update-rc.d $OPT -f enable_autosleep.sh remove
-    update-rc.d $OPT enable_autosleep.sh start 99 2 3 4 5 . stop 80 0 1 6 .
-    update-rc.d $OPT -f time_services remove
-    update-rc.d $OPT time_services start 01 2 3 4 5 . stop 80 0 1 6 .
+    update-rc.d $OPT enable_autosleep.sh start 99 S . stop 80 S .
 }

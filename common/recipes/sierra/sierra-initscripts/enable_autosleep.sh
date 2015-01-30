@@ -4,6 +4,13 @@
 
 case "$1" in
     start)
+        if [ -x /usr/bin/epollwakeup ]
+        then
+            echo -n "Starting epollwakeup: "
+            start-stop-daemon -S -b -a /usr/bin/epollwakeup
+            echo "done"
+        fi
+
         # Enable the autosleep feature
         if [ -f /sys/power/autosleep ]
         then
@@ -13,6 +20,13 @@ case "$1" in
         fi
         ;;
     stop)
+        echo -n "Stopping epollwakeup: "
+        start-stop-daemon -K -n epollwakeup
+        echo "done"
+        ;;
+    restart)
+        $0 stop
+        $0 start
         ;;
     *)
         exit 1

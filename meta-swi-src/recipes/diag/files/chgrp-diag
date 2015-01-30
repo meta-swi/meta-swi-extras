@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# DM, FIXME: We probably do not need this. Also diag group does not exist (should we create one?).
+exit 0
+
+#change the group that owns /dev/diag and change permissions to user rw and group rw (no other rw)
+chgrp diag /dev/diag
+chmod 660 /dev/diag

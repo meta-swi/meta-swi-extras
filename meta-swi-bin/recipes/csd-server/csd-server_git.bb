@@ -9,10 +9,16 @@ SRC_URI = "file://csd-server-bin.tar.bz2"
 
 S = "${WORKDIR}/csd-server-bin"
 
-INITSCRIPT_NAME = "csdserver"
-INITSCRIPT_PARAMS = "start 45 2 3 4 5 . stop 80 0 1 6 ."
+#
+# DM, FIXME: I am disabling this bellow to match recipe result in meta-swi-src. If startup (S/K)
+# links become available in meta-swi-src, make sure these are enabled here as well.
+#
+#INITSCRIPT_NAME = "csdserver"
+#INITSCRIPT_PARAMS = "start 45 S . stop 55 S ."
 
-inherit update-rc.d
+# If this is enabled and INITSCRIPT_PARAMS is not, rc0.d - rc6.d directories will be created and
+# S/K csdserver links will show up in every one of them.
+#inherit update-rc.d
 
 do_install_append(){
     install -m 0755 ${S}/etc/init.d/csdserver -D ${D}${sysconfdir}/init.d/csdserver

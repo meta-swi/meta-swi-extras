@@ -14,7 +14,7 @@ Clone poky from yocto website and switch to the yocto-1.6.1 tag:
 
 	$ git clone git://git.yoctoproject.org/poky.git
 	$ cd poky
-	$ git checkout -b yocto-1.6.1-local bda51ee7821de9120f6f536fcabe592f2a0c8a37
+	$ git checkout -b yocto-1.6.1-local 30b8d9378b8260e452552b806610dc9b6fe0b69f
 	$ cd ../
 
 Clone meta-openembedded and switch to the following commit 

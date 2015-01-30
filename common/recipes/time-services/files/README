@@ -1,0 +1,9 @@
+The files in this directory handle the start-up of time-services based on the time_services.conf file.
+The two services potentially started are the qcomm time_daemon or ntpd (either as daemon or in a one shot mode).
+time_daemon updates system time from the RTC or the modem if you connect with a cellular network.
+ntpd will look for a NTP time service on a network. This generally takes several seconds.
+
+By default the time_daemon will set the system time but in a development environment where you may be connected
+to an ethernet connection but not necessarily a cellular network or have a battery backed up rtc, the ntpd option
+can be used.
+

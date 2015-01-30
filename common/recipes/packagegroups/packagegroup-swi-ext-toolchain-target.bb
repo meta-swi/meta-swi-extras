@@ -1,4 +1,4 @@
-SUMMARY = "Sierra Software Development Kit (Internal Release)"
+SUMMARY = "Sierra Software Development Kit (External Release)"
 LICENSE = "MIT"
 PR = "r1"
 

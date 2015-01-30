@@ -1,0 +1,3 @@
+#! /bin/sh
+
+/etc/init.d/ntpd_time_service stop

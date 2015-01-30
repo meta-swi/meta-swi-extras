@@ -28,23 +28,31 @@ usage()
 {
     cat << EOF
 Usage:
-$0
+$0 <options ...>
+
+  Global:
     -p <poky_dir>
     -o <meta-openembedded dir>
     -l <SWI meta layer>
-    -x <Linux repo directory>
+    -x <linux repo directory>
     -m <SWI machine type>
     -b <build_dir>
     -t <number of bitbake tasks>
     -j <number of make threads>
-    -w <QCT src directory (apps_proc)>
-    -d (Build the full debug version)
-    -c (enable command line mode)
     -r (enable preempt-rt kernel <Test-only. Not supported>)
+    -g (enable Legato setup and build Legato images)
+    -a (pass extra options for recipes, key=value separated by ::)
+
+  Machine swi-mdm9x15:
     -q (enable Qualcomm Proprietary bin)
     -s (enable Qualcomm Proprietary source)
-    -g (Enable Legato setup by default)
-    -k (Build the toolchain)
+    -w <Qualcomm source directory (apps_proc)>
+    -v <version of Qualcomm sources>
+
+  Task control:
+    -c (enable command line mode)
+    -d (build the full debug image)
+    -k (build the toolchain)
 EOF
 }
 
@@ -60,7 +68,7 @@ fi
 
 BD="$scriptdir/../build" MACH=swi-mdm9x15 DEBUG=false TASKS=4 THREADS=4 CMD_LINE=false TOOLCHAIN=false ENABLE_RT=false ENABLE_PROPRIETARY=false ENABLE_PROPRIETARY_SRC=false ENABLE_ICECC=false DISTRO=poky
 
-while getopts ":p:o:b:l:x:m:t:j:w:cdrqsgkh" arg
+while getopts ":p:o:b:l:x:m:t:j:w:v:a:cdrqsgkh" arg
 do
     case $arg in
     p)
@@ -99,6 +107,10 @@ do
         THREADS=$OPTARG
         echo "Number of make threads $THREADS"
         ;;
+    a)
+        X_OPTS=$OPTARG
+        echo "Extra options added -  $X_OPTS"
+        ;;
     c)  CMD_LINE=true
         echo "Enable command line mode"
         ;;
@@ -111,12 +123,15 @@ do
     s)  ENABLE_PROPRIETARY_SRC=true
         echo "Enable Qualcomm Proprietary source - overrides binary option"
         ;;
-        w)
-            WK=$(readlink -f $OPTARG)
-            ;;
-        g)
-            DEF_LEGATO="true"
-            ;;
+    w)
+        WK=$(readlink -f $OPTARG)
+        ;;
+    v)
+        FW_VERSION=$OPTARG
+        ;;
+    g)
+        DEF_LEGATO="true"
+        ;;
     k)  TOOLCHAIN=true
         echo "Build toolchain"
         ;;
@@ -132,7 +147,7 @@ done
 
 . ${WS}/oe-init-build-env $BD
 
-## Conf: bblayers.conf
+## Conf: bblayers.conf
 
 enable_layer()
 {
@@ -155,7 +170,7 @@ enable_layer()
 if test $MACH = "swi-s6"; then
     # Enable the meta-swi-s6 layer
     enable_layer "meta-swi-s6" "$SWI/meta-swi-s6"
-elif test $MACH = "swi-virt"; then
+elif test $MACH = "swi-virt-arm" || test $MACH = "swi-virt-x86"; then
     # Enable the meta-swi-virt layer
     enable_layer "meta-swi-virt" "$SWI/meta-swi-virt"
 else
@@ -190,6 +205,11 @@ if [ $ENABLE_PROPRIETARY_SRC = true ]; then
 
     echo "Workspace dir: $WORKSPACE"
     export WORKSPACE
+
+    if [ -n "$FW_VERSION" ]; then
+        echo "Workspace version: $FW_VERSION"
+        export FW_VERSION
+    fi
 
     enable_layer "meta-swi-src" "$scriptdir/meta-swi-src" "meta-swi-mdm9x15"
 
@@ -235,7 +255,7 @@ if [ $ENABLE_PROPRIETARY_SRC = true ] || [ $ENABLE_PROPRIETARY = true ]; then
     enable_layer "meta-swi-extras" "$scriptdir" "meta-swi-mdm9x15"
 fi
 
-## Conf: local.conf
+## Conf: local.conf
 
 # Tune local.conf file
 sed -e 's:^\(MACHINE\).*:\1 = \"'$MACH'\":' -i $BD/conf/local.conf
@@ -245,6 +265,47 @@ if [ $? != 0 ]; then
 fi
 sed -e 's:^#\(BB_NUMBER_THREADS\).*:\1 = \"'"$TASKS"'\":' -i $BD/conf/local.conf
 sed -e 's:^#\(PARALLEL_MAKE\).*:\1 = \"-j '"$THREADS"'\":' -i $BD/conf/local.conf
+
+if [ -n "$FW_VERSION" ]; then
+    FW_VERSION_ENTRY=$(grep "FW_VERSION =" $BD/conf/local.conf)
+    if [ $? != 0 ]; then
+        # Append
+        sed -e '/^WORKSPACE/a\FW_VERSION = \"'"${FW_VERSION}"'\"\n' -i $BD/conf/local.conf
+    else
+        CURRENT_FW_VERSION=$(echo $FW_VERSION_ENTRY | sed -e 's/FW_VERSION = \"\(.*\)\"/\1/g')
+        if [[ "$FW_VERSION" != "$CURRENT_FW_VERSION" ]]; then
+            # Update entry
+            echo "Updating FW_VERSION from '${CURRENT_FW_VERSION}' to '${FW_VERSION}'"
+            sed -e 's/FW_VERSION = \".*\"/FW_VERSION = \"'"${FW_VERSION}"'\"/g' -i $BD/conf/local.conf
+        else
+            echo "Keeping FW_VERSION '${FW_VERSION}'"
+        fi
+    fi
+fi
+
+# Add or update extra options
+if [ -n "$X_OPTS" ]
+then
+    EXTRA_OPTS=$(echo $X_OPTS | sed -e "s/\:\:/ /g")
+    for OPT in $EXTRA_OPTS
+    do
+        opt_name=$(echo $OPT | cut -d"=" -f1)
+        opt_val=$(echo $OPT | cut -d"=" -f2-)
+
+        OPT_ENTRY=$(grep "$opt_name =" $BD/conf/local.conf)
+        if [ $? != 0 ]; then
+            # Append
+            echo "Adding option $opt_name with value $opt_val"
+            echo "$opt_name = \"$opt_val\"" >> $BD/conf/local.conf
+        else
+            # Update entry
+            echo "Updating $opt_name to $opt_val"
+            sed -e "s/$opt_name = \".*//g" -i $BD/conf/local.conf
+            echo "$opt_name = \"$opt_val\"" >> $BD/conf/local.conf
+        fi
+    done
+fi
+
 
 if [ $ENABLE_RT = true ]; then
     grep -E "PREFERRED_PROVIDER_virtual\/kernel" $BD/conf/local.conf > /dev/null
@@ -266,7 +327,7 @@ if [ $ENABLE_ICECC = true ]; then
     if ! grep icecc $BD/conf/local.conf > /dev/null; then
         echo 'INHERIT += "icecc"' >> $BD/conf/local.conf
         echo 'ICECC_PARALLEL_MAKE = "-j 20"' >> $BD/conf/local.conf
-        echo 'ICECC_USER_PACKAGE_BL = "ncurses e2fsprogs libx11 gmp libcap perl busybox lk"' >> $BD/conf/local.conf
+        echo 'ICECC_USER_PACKAGE_BL = "ncurses e2fsprogs libx11 gmp libcap perl busybox lk libgpg-error libarchive"' >> $BD/conf/local.conf
     fi
 fi
 
@@ -291,24 +352,25 @@ fi
 # Images
 echo -n "Build image of "
 if [ $DEBUG = true ]; then
-    echo "dev rootfs."
+    echo "dev rootfs (for $MACH)."
     sed -e 's:^\(PACKAGE_CLASSES\).*:\1 = \"package_rpm\":' -i $BD/conf/local.conf
     if test $MACH = "swi-s6"; then
         bitbake swi-s6-image-dev
-    elif test $MACH = "swi-virt"; then
+    elif test $MACH = "swi-virt-arm" || test $MACH = "swi-virt-x86"; then
         bitbake swi-virt-image-dev
     else
         bitbake mdm9x15-image-dev
     fi
 else
-    echo "minimal rootfs."
+    echo "minimal rootfs (for $MACH)."
     sed -e 's:^\(PACKAGE_CLASSES\).*:\1 = \"package_ipk\":' -i $BD/conf/local.conf
     if test $MACH = "swi-s6"; then
         bitbake swi-s6-image-minimal
-    elif test $MACH = "swi-virt"; then
-        echo "No minimal image."
+    elif test $MACH = "swi-virt-arm" || test $MACH = "swi-virt-x86"; then
+        echo "No minimal image for $MACH."
         exit 1
     else
         bitbake mdm9x15-image-minimal
     fi
 fi
+

@@ -9,7 +9,7 @@ S = "${WORKDIR}"
 
 #does not appear to work if run as start 01
 INITSCRIPT_NAME = "modem-shutdown"
-INITSCRIPT_PARAMS = "stop 01 0 6 ."
+INITSCRIPT_PARAMS = "stop 01 S ."
 
 inherit update-rc.d
 

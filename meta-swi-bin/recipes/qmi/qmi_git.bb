@@ -12,7 +12,7 @@ SRC_URI = "file://qmi-bin.tar.bz2"
 S = "${WORKDIR}/qmi-bin"
 
 INITSCRIPT_NAME = "qmuxd"
-INITSCRIPT_PARAMS = "start 40 2 3 4 5 . stop 80 0 1 6 ."
+INITSCRIPT_PARAMS = "start 40 S . stop 60 S ."
 
 inherit update-rc.d
 

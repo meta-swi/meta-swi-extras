@@ -3,6 +3,7 @@
 IMAGE_INSTALL += "sierra"
 IMAGE_INSTALL += "sierra-m2m-init"
 IMAGE_INSTALL += "sierra-initscripts"
+IMAGE_INSTALL += "time-services"
 IMAGE_INSTALL += "legato-init"
 
 # Add some extra packages for tool integration
@@ -15,7 +16,6 @@ IMAGE_INSTALL += "lttng-modules"
 
 IMAGE_INSTALL += "iproute2"
 IMAGE_INSTALL += "iptables"
-IMAGE_INSTALL += "udev-cache"
 
 IMAGE_INSTALL += "opkg"
 IMAGE_INSTALL += "openssl"
@@ -31,9 +31,19 @@ IMAGE_INSTALL += "bzip2"
 #Required for extended file attributes
 IMAGE_INSTALL += "attr"
 
-# Required for some Developer Studio features. 
+#Adds EPOLLWAKEUP app to monitor USB link
+IMAGE_INSTALL += "epollwakeup"
+
+# Required for some Developer Studio features.
 # Not needed for production builds
-# Note that this pulls bash back in
 IMAGE_INSTALL += "openssh-sftp-server"
 IMAGE_INSTALL += "tcf-agent"
-IMAGE_INSTALL += "bash"
+
+do_copy_swi_version() {
+    cd ${DEPLOY_DIR_IMAGE}
+    cp ${IMAGE_ROOTFS}/etc/legato/version ${IMAGE_NAME}.rootfs.version
+    ln -sf ${IMAGE_NAME}.rootfs.version ${IMAGE_LINK_NAME}.version
+}
+
+addtask copy_swi_version after do_rootfs before do_build
+

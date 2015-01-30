@@ -14,6 +14,7 @@
 #              (host driver = 'sierra' or 'GobiSerial')
 #     nmea   - enumerates an NMEA port as a serial port
 #     audio  - enumerates a USB audio port
+#     diag   - enumerates a diag / DM port as a serial port
 
 usb_modes=""
 func=""
@@ -21,12 +22,12 @@ func=""
 acm_transports=""
 serial_transports=""
 
-if [ -f /mnt/flash/startup/usb/usbmode ]                                       
-then                                                                          
-  usb_modes=`cat /mnt/flash/startup/usb/usbmode`                               
+if [ -f /mnt/flash/startup/usb/usbmode ]
+then
+  usb_modes=$(cat /mnt/flash/startup/usb/usbmode)
 elif [ -f /etc/legato/usbmode ]
 then
-  usb_modes=`cat /etc/legato/usbmode`                               
+  usb_modes=$(cat /etc/legato/usbmode)
 fi
 
 add_serial() {
@@ -42,8 +43,8 @@ if [ -z "$usb_modes" ]
 then
   exit 0
 else
-  for usb_mode in $usb_modes                                                  
-  do                                                                          
+  for usb_mode in $usb_modes
+  do
     echo $usb_mode
     if [ -n "${func}" ]
     then
@@ -51,10 +52,10 @@ else
     fi
 
     if [ $usb_mode = "acm" ]
-    then                                                                      
+    then
       acm_transports="smd"
-      func="${func}acm"                                       
-    elif [ $usb_mode = "nmea" ] 
+      func="${func}acm"
+    elif [ $usb_mode = "nmea" ]
     then
       add_serial tty
       func="${func}serial"
@@ -62,9 +63,13 @@ else
     then
       add_serial smd
       func="${func}serial"
-    elif [ $usb_mode = "ecm" ] 
+    elif [ $usb_mode = "ecm" ]
     then
       func="${func}ecm"
+    elif [ $usb_mode = "diag" ]
+    then
+      func="${func}diag"
+      echo "diag" > /sys/class/android_usb/android0/f_diag/clients
     else
       func="${func}${usb_mode}"
     fi
@@ -86,6 +91,7 @@ else
       echo "${acm_transports}" > /sys/class/android_usb/android0/f_acm/acm_transports
     fi
 
-    echo $func > /sys/class/android_usb/android0/functions                 
+    echo $func > /sys/class/android_usb/android0/functions
   fi
 fi
+

@@ -9,10 +9,10 @@ uart_get_srv
 
 if [ ${UART1_SERVICE} = "CONSOLE" ]; then
   swi_log "UART1 reserved for CONSOLE"
-  /sbin/getty ttyHSL0 115200 console
+  /sbin/getty ttyHSL0 115200 vt100
 elif [ ${UART2_SERVICE} = "CONSOLE" ]; then
   swi_log "UART2 reserved for CONSOLE"
-  /sbin/getty ttyHSL1 115200 console
+  /sbin/getty ttyHSL1 115200 vt100
 else
   swi_log "No UART mapped to CONSOLE"
 

@@ -12,7 +12,7 @@ SRC_URI = "file://diag-bin.tar.bz2 \
 S = "${WORKDIR}/diag-bin"
 
 INITSCRIPT_NAME = "chgrp-diag"
-INITSCRIPT_PARAMS = "start 15 2 3 4 5 ."
+INITSCRIPT_PARAMS = "start 15 S ."
 
 inherit update-rc.d
 
