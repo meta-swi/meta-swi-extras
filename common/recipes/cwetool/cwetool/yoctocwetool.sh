@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Script to build .cwe files for download via 'FDT'
 #
@@ -32,22 +32,17 @@ OUTFILE=`pwd`/yocto.cwe
 OUTZFILE=`pwd`/yoctoz.cwe
 RFS_FILE="rootfs"
 UFS_FILE=""
-FBT_FILE="appsboot.mbn"
+FBT_FILE=""
 KERNEL_FILE="kernel"
 
 # create a symlink hdrcnv to the real hdrcnv utility
 HDRCNV=""
-ARCH="`uname -m`"
-#[ "$ARCH" = "x86_64" ] && HDRCNV=$TOOLDIR/hdrcnv-Lin64.exe  # need to use SL3 CWE tool
-#[ "$ARCH" = "i686"   ] && HDRCNV=$TOOLDIR/hdrcnv-Lin32.exe  # need to use SL3 CWE tool
-#[ -z "$HDRCNV" ] && HDRCNV=$TOOLDIR/hdrcnv
+ARCH=$(uname -m)
 HDRCNV=hdrcnv
-#[ -f "$HDRCNV" ] || exit 1
 CWEZIP=cwezip
-#[ -f "$CWEZIP" ] || exit 1
 
 y=${1%.*}
-DATESTAMP=`date`
+DATESTAMP=$(date)
 COMPAT_BYTE=00000001
 PLATFORM=9X15
 PKID=A911
@@ -116,8 +111,18 @@ if [ -f ${TMPMBN} ] ; then
     rm -f ${TMPMBN}.data
 fi
 
-if [ ${RFS_FILE} ] && [ -f ${RFS_FILE} ] ; then
-    echo "\ngenerating CWE for ${RFS_FILE}"
+function check_exist() {
+  IMG_FILE=$1
+
+  if ! [ -e "$IMG_FILE" ] ; then
+    echo "ERROR: $IMG_FILE doesn't exist"
+    exit 1
+  fi
+}
+
+if [ -n "${RFS_FILE}" ] ; then
+    echo -e "\nGenerating CWE for rootfs ${RFS_FILE}"
+    check_exist ${RFS_FILE}
     if [ -f ${TMPMBN} ] ; then rm -f ${TMPMBN}; fi
     if [ -f ${TMPMBN}.hdr ] ; then rm -f ${TMPMBN}.hdr; fi
     if [ -f ${TMPMBN}.cwe ] ; then rm -f ${TMPMBN}.cwe; fi
@@ -131,13 +136,11 @@ if [ ${RFS_FILE} ] && [ -f ${RFS_FILE} ] ; then
     else
         dd if=${TMPMBN}.cwe >> ${TMPMBN}.data
     fi
-elif [ ${RFS_FILE} ] ; then
-    echo -e "rootfs file: $RFS_FILE not found "
-    exit 1
 fi
 
-if [ ${UFS_FILE} ] && [ -f ${UFS_FILE} ] ; then
-    echo "\ngenerating CWE for ${UFS_FILE}"
+if [ -n "${UFS_FILE}" ] ; then
+    echo -e "\nGenerating CWE for userfs ${UFS_FILE}"
+    check_exist ${UFS_FILE}
     if [ -f ${TMPMBN} ] ; then rm -f ${TMPMBN}; fi
     if [ -f ${TMPMBN}.hdr ] ; then rm -f ${TMPMBN}.hdr; fi
     if [ -f ${TMPMBN}.cwe ] ; then rm -f ${TMPMBN}.cwe; fi
@@ -153,8 +156,9 @@ if [ ${UFS_FILE} ] && [ -f ${UFS_FILE} ] ; then
     fi
 fi
 
-if [ ${FBT_FILE} ] && [ -f ${FBT_FILE} ] ; then
-    echo "\ngenerating CWE for ${FBT_FILE}"
+if [ -n "${FBT_FILE}" ] ; then
+    echo -e "\nGenerating CWE for bootloader ${FBT_FILE}"
+    check_exist ${FBT_FILE}
     if [ -f ${TMPMBN} ] ; then rm -f ${TMPMBN}; fi
     if [ -f ${TMPMBN}.hdr ] ; then rm -f ${TMPMBN}.hdr; fi
     if [ -f ${TMPMBN}.cwe ] ; then rm -f ${TMPMBN}.cwe; fi
@@ -162,13 +166,11 @@ if [ ${FBT_FILE} ] && [ -f ${FBT_FILE} ] ; then
     $HDRCNV ${TMPMBN} -OH ${TMPMBN}.hdr -IT APBL -PT $PLATFORM -V "${DATESTAMP}" -B $COMPAT_BYTE
     cat ${TMPMBN}.hdr ${TMPMBN} > ${TMPMBN}.cwe
     dd if=${TMPMBN}.cwe >> ${TMPMBN}.data
-elif [ ${FBT_FILE} ] ; then
-    echo -e "boot image: $FBT_FILE not found "
-    exit 1
 fi
 
-if [ ${KERNEL_FILE} ] && [ -f ${KERNEL_FILE} ] ; then
-    echo "\ngenerating CWE for ${KERNEL_FILE}"
+if [ -n "${KERNEL_FILE}" ] ; then
+    echo -e "\nGenerating CWE for kernel ${KERNEL_FILE}"
+    check_exist ${KERNEL_FILE}
     if [ -f ${TMPMBN} ] ; then rm -f ${TMPMBN}; fi
     if [ -f ${TMPMBN}.hdr ] ; then rm -f ${TMPMBN}.hdr; fi
     if [ -f ${TMPMBN}.cwe ] ; then rm -f ${TMPMBN}.cwe; fi
@@ -182,9 +184,6 @@ if [ ${KERNEL_FILE} ] && [ -f ${KERNEL_FILE} ] ; then
     else
         dd if=${TMPMBN}.cwe >> ${TMPMBN}.data
     fi
-elif [ ${KERNEL_FILE} ] ; then
-    echo -e "kernel image: $KERNEL_FILE not found "
-    exit 1
 fi
 
 echo "Creating Top-level CWE header.  Type = APPL"

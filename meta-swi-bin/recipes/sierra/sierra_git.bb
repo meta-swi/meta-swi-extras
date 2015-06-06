@@ -23,6 +23,8 @@ USERRW_MOUNTPOINT = "/mnt/userrw"
 PERSIST_MOUNTPOINT = "/mnt/persist"
 # Flash mountpoint is for the large flash partition
 FLASH_MOUNTPOINT = "/mnt/flash"
+# Smack mount point
+SMACK_MOUNTPOINT = "/mnt/smack"
 # Extra flash mount point for misc flash use (e.g. mounting user0 partition).
 FLASH_MOUNTPOINT_LEGATO = "/mnt/legato"
 # Required by some
@@ -45,6 +47,7 @@ do_install_append() {
     install -m 0755 -d ${D}${USERRW_MOUNTPOINT}
     install -m 0755 -d ${D}${PERSIST_MOUNTPOINT}
     install -m 0755 -d ${D}${FLASH_MOUNTPOINT}
+    install -m 0755 -d ${D}${SMACK_MOUNTPOINT}
     install -m 0755 -d ${D}${FLASH_MOUNTPOINT_LEGATO}
     install -m 0755 -d ${D}${DATA_DIR}
     install -m 0755 -d ${D}${LEGATO_MOUNTPOINT}
@@ -61,6 +64,7 @@ FILES_${PN} += " \
                ${USERRW_MOUNTPOINT} \
                ${PERSIST_MOUNTPOINT} \
                ${FLASH_MOUNTPOINT} \
+               ${SMACK_MOUNTPOINT} \
                ${FLASH_MOUNTPOINT_LEGATO} \
                ${DATA_DIR} \
                ${LEGATO_MOUNTPOINT} \

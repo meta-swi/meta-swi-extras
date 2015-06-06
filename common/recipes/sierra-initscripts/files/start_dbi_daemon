@@ -1,0 +1,29 @@
+#!/bin/sh
+
+set -e
+DELAY=2
+
+case "$1" in
+start)
+	sleep $DELAY
+    echo -n "Starting dbireset: "
+    start-stop-daemon -S -b -a /usr/bin/dbi
+    echo "done"
+    ;;
+  stop)
+    echo -n "Stopping dbireset: "
+    start-stop-daemon -K -n dbi
+    echo "done"
+    ;;
+  restart)
+    $0 stop
+    $0 start
+    ;;
+  *)
+    echo "Usage dbi{ start | stop | restart }" >&2
+    exit 1
+    ;;
+esac
+
+exit 0
+

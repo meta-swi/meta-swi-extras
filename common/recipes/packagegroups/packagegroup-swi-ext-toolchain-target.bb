@@ -11,6 +11,5 @@ RDEPENDS_${PN} += "\
     loc-api-dev \
     sierra-dev \
     sierra-staticdev \
-    libgcov-dev \
     sierra-dev-headers-dev \
     "

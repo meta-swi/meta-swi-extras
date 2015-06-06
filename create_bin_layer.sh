@@ -1,5 +1,5 @@
 #!/bin/bash
-# 
+#
 
 usage()
 {
@@ -7,7 +7,7 @@ usage()
 Usage:
 $0
     -b <build_dir>
-    -o <output_dir>
+    -o <output_dir (relative to current dir)>
     -v <version (FW version)>
 EOF
 }
@@ -35,8 +35,17 @@ setup_dirs ()
         usage_and_exit 1
     fi
     cd ${scriptdir}
+    mkdir -p ${OD}
     cp -R meta-swi-bin ${OD}
     echo "Created base output dir ${OD}"
+}
+
+check_ret() {
+    RETVAL=$?
+    if [ $RETVAL -ne 0 ]; then
+        echo "Exit Code $RETVAL"
+        exit $RETVAL
+    fi
 }
 
 package_basic ()
@@ -44,8 +53,8 @@ package_basic ()
     package=$1
     version=$2
     remove_headers=$3
-    
-    if [ $# -eq 4 ] 
+
+    if [ $# -eq 4 ]
     then
         target=$4
     else
@@ -56,12 +65,22 @@ package_basic ()
     # First create a copy in /tmp to allow us to work
     rm -fr /tmp/${package}-bin
     mkdir /tmp/${package}-bin
-    cp -R ${BD}/tmp/work/armv7a-vfp-neon-poky-linux-gnueabi/${package}/${version}/image/* /tmp/${package}-bin
+
+    package_dir="${BD}/tmp/work/armv7a-vfp-neon-poky-linux-gnueabi/${package}/${version}"
+
+    if ! [ -e "$package_dir" ]
+    then
+        echo "'$package_dir' doesn't exist"
+        exit 1
+    fi
+
+    cp -R ${package_dir}/image/* /tmp/${package}-bin
 
     # Copy the license file into place
     if [ ${package} != "sierra" ]
     then
-        cp ${OD}/recipes/LICENSE /tmp/${package}-bin
+        cp ${OD}/meta-swi-bin/recipes/LICENSE /tmp/${package}-bin
+        check_ret
     fi
 
     if [ ${remove_headers} = "true" ]
@@ -84,8 +103,9 @@ package_basic ()
     # Package up the bzip file
     cd /tmp
     tar cjf ${package}-bin.tar.bz2 ${package}-bin
-    cd ${OD}/recipes/${target}/files
-    mv ${package}-bin.tar.bz2 ${package}-bin.tar.bz2.old
+
+    mkdir -p ${OD}/meta-swi-bin/recipes/${target}/files
+    cd ${OD}/meta-swi-bin/recipes/${target}/files
     mv /tmp/${package}-bin.tar.bz2 ${package}-bin.tar.bz2
 }
 
@@ -118,9 +138,10 @@ do
 done
 
 setup_dirs
+echo $VER > ${OD}/meta-swi-bin/fw-version
+
 package_basic acdbloader git-r1 true
 package_basic acdbmapper git-r1 true
-package_basic alsa-intf 1.0-r0 false
 package_basic audcal git-r1 true
 package_basic audcaltests git-r1 false
 package_basic audio-ftm git-r1 false
@@ -141,10 +162,11 @@ package_basic time-services git-r2 false
 package_basic xmllib git-r7 true
 
 cd ${scriptdir}
-mv meta-swi-bin meta-swi-bin.old
-mv ${OD} meta-swi-bin
+rm -rf meta-swi-bin
+mv ${OD}/meta-swi-bin meta-swi-bin
+rm -rf ${OD}
 
-echo $VER > meta-swi-bin/fw-version
 
 echo "Layer created"
 exit 0
+

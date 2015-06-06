@@ -66,7 +66,7 @@ if [ $# = 0 ]; then
     usage_and_exit 1
 fi
 
-BD="$scriptdir/../build" MACH=swi-mdm9x15 DEBUG=false TASKS=4 THREADS=4 CMD_LINE=false TOOLCHAIN=false ENABLE_RT=false ENABLE_PROPRIETARY=false ENABLE_PROPRIETARY_SRC=false ENABLE_ICECC=false DISTRO=poky
+BD="$scriptdir/../build" MACH=swi-mdm9x15 DEBUG=false TASKS=4 THREADS=4 CMD_LINE=false TOOLCHAIN=false ENABLE_RT=false ENABLE_PROPRIETARY=false ENABLE_PROPRIETARY_SRC=false ENABLE_ICECC=false DISTRO=poky-swi
 
 while getopts ":p:o:b:l:x:m:t:j:w:v:a:cdrqsgkh" arg
 do
@@ -232,6 +232,12 @@ if [ $ENABLE_PROPRIETARY_SRC = true ]; then
         echo "Unable to copy qapi common files from modem_proc"
         exit 1
     fi
+    # Provice common qcsi files as a link to common qapi files
+    rm -rf $WORKSPACE/sierra/qcsi/common && ( cd $WORKSPACE/sierra/qcsi && ln -s ../qapi/common common )
+    if [ $? != 0 ]; then
+        echo "Unable to provide qcsi common files from modem_proc"
+        exit 1
+    fi
     # We have to copy the NV files from the modem dir
     cp -f $WORKSPACE/../modem_proc/sierra/src/nv/src/common/* $WORKSPACE/sierra/nv/common
     if [ $? != 0 ]; then
@@ -341,10 +347,10 @@ fi
 
 # Toolchain
 if [ $TOOLCHAIN = true ]; then
-    if test $MACH = "swi-s6"; then
-        bitbake meta-toolchain
-    else
+    if test $MACH = "swi-mdm9x15"; then
         bitbake meta-toolchain-swi-ext
+    else
+        bitbake meta-toolchain-swi
     fi
     exit $?
 fi

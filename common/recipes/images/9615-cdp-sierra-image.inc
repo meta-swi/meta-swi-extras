@@ -3,7 +3,7 @@
 IMAGE_INSTALL += "sierra"
 IMAGE_INSTALL += "sierra-m2m-init"
 IMAGE_INSTALL += "sierra-initscripts"
-IMAGE_INSTALL += "time-services"
+IMAGE_INSTALL += "sierra-timeservices"
 IMAGE_INSTALL += "legato-init"
 
 # Add some extra packages for tool integration
@@ -34,10 +34,20 @@ IMAGE_INSTALL += "attr"
 #Adds EPOLLWAKEUP app to monitor USB link
 IMAGE_INSTALL += "epollwakeup"
 
+# Add usb utils to enable lsusb on the target
+IMAGE_INSTALL += "usbutils"
+
 # Required for some Developer Studio features.
 # Not needed for production builds
 IMAGE_INSTALL += "openssh-sftp-server"
 IMAGE_INSTALL += "tcf-agent"
+
+# Kernel modules
+IMAGE_INSTALL += "kernel-module-xt-conntrack"
+IMAGE_INSTALL += "kernel-module-iptable-mangle"
+IMAGE_INSTALL += "kernel-module-xt-cgroup"
+IMAGE_INSTALL += "kernel-module-xt-mark"
+IMAGE_INSTALL += "kernel-module-xt-connmark"
 
 do_copy_swi_version() {
     cd ${DEPLOY_DIR_IMAGE}

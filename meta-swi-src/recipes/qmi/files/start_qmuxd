@@ -1,0 +1,19 @@
+#~/bin/sh
+#
+# Dragan Marinkovic (dmarinkovi@sierrawireless.com)
+# Copyright (c) 2014 Sierra Wireless
+#
+# Very primitive integrity monitor capable of restarting
+# process if it dies.
+#
+while true ; do
+    # Make sure that all qmuxd instances are done.
+    /usr/bin/killall -9 qmuxd >/dev/null 2>&1
+
+    # Start qmuxd. This script will block until qmuxd
+    # dies or exits. In order to prevent excessive
+    # restart loops, few seconds delay is welcome.
+    echo "Starting qmuxd..."
+    /usr/bin/qmuxd >/dev/null 2>&1
+    sleep 2
+done

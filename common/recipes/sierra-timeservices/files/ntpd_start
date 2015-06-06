@@ -1,0 +1,5 @@
+#! /bin/sh
+
+if [ "$IFACE" = "eth0" ]; then
+    /etc/init.d/ntpd_time_service start
+fi

@@ -100,7 +100,7 @@ COMMON_SRC := \
 
 poky:
 	git clone git://git.yoctoproject.org/poky
-	cd poky && git checkout bda51ee7821de9120f6f536fcabe592f2a0c8a37
+	cd poky && git checkout refs/tags/daisy-11.0.2
 
 meta-openembedded:
 	git clone git://git.openembedded.org/meta-openembedded
@@ -111,10 +111,14 @@ meta-openembedded:
 image_bin: poky meta-openembedded
 	$(COMMON_BIN)
 
+image: image_bin
+
 ## toolchains
 
 toolchain_bin: poky meta-openembedded
 	$(COMMON_BIN) -k
+
+toolchain: toolchain_bin
 
 ## dev shell
 
@@ -135,7 +139,7 @@ COMMON_VIRT_X86 := \
 
 ## images
 
-image_virt_arm: 
+image_virt_arm:
 	$(COMMON_VIRT_ARM) -d
 
 image_virt_x86:
@@ -145,7 +149,7 @@ image_virt: image_virt_arm
 
 ## toolchains
 
-toolchain_virt_arm: 
+toolchain_virt_arm:
 	$(COMMON_VIRT_ARM) -k
 
 toolchain_virt_x86:

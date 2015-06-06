@@ -30,5 +30,6 @@ inherit proprietary-qcom
 inherit update-rc.d
 
 do_install_append() {
-       install -m 0755 ${WORKDIR}/qmi/qmuxd/start_qmuxd_le -D ${D}${sysconfdir}/init.d/qmuxd
+       install -m 0755 ${THISDIR}/files/qmuxd -D ${D}${sysconfdir}/init.d/qmuxd
+       install -m 0755 ${THISDIR}/files/start_qmuxd -D ${D}${sysconfdir}/init.d/start_qmuxd
 }

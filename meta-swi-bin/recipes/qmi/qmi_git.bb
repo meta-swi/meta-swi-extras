@@ -17,7 +17,8 @@ INITSCRIPT_PARAMS = "start 40 S . stop 60 S ."
 inherit update-rc.d
 
 do_install_append() {
-    install -m 0755 ${WORKDIR}/qmi-bin/qmuxd/start_qmuxd_le -D ${D}${sysconfdir}/init.d/qmuxd
+    install -m 0755 ${S}/etc/init.d/qmuxd -D ${D}${sysconfdir}/init.d/qmuxd
+    install -m 0755 ${S}/etc/init.d/start_qmuxd -D ${D}${sysconfdir}/init.d/start_qmuxd
 
     # Copy the /usr tree across for imaging
     cp -R --preserve=links ${S}/usr ${D}
