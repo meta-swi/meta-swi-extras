@@ -7,15 +7,69 @@ source /etc/run.env
 # This executable
 this_e=$( basename $0 )
 
+# UBI FS mount options.
+UBI_MNTOPT="ro,smackfsdef='_'"
+
 # Yaffs2 FS mount options.
 YAFFS2_MNTOPT="rw,tags-ecc-off,smackfsdef='_'"
 
-# This is required by UFS as well as Legato. It must be executed
-# no matter what.
-mount_early_scratch_start()
+wait_for_dev()
 {
-    mount_yaffs_fs ${UFS_MTDEV_NAME} ${FLASH_MOUNTPOINT}
-    return $?
+    while ! [ -e "$1" ]; do
+        usleep 100
+    done
+}
+
+# Generic function to mount ubi filesystem
+mount_ubi_fs()
+{
+    local ret=${SWI_OK}
+    local mtd_part_name=$1
+    local mtd_dev_num=
+    local ubi_dev_num=1
+    local ubi_block_num=0
+    local mntpt=$2
+    local parttype=$3
+
+    # Get the device number
+    mtd_dev_num=$( cat /proc/mtd | \
+                   grep ${mtd_part_name} | \
+                   sed 's/mtd\([0-9]*\):.*/\1/' )
+
+    if ! dd if=/dev/mtd${mtd_dev_num} count=4 bs=1 2>/dev/null | grep 'UBI#' > /dev/null; then
+        swi_log "UBI: mtd ${mtd_dev_num} it not UBI."
+        return ${SWI_ERR}
+    else
+        swi_log "UBI: mtd ${mtd_dev_num} is UBI."
+    fi
+
+    ubiattach -m ${mtd_dev_num} -d ${ubi_dev_num}
+    if [ $? -ne 0 ] ; then
+        swi_log "UBI: Unable to attach ${mtd_dev_num}."
+        return ${SWI_ERR}
+    fi
+
+    wait_for_dev "/dev/ubi${ubi_dev_num}_${ubi_block_num}"
+
+    ubiblkvol --attach /dev/ubi${ubi_dev_num}_${ubi_block_num}
+    if [ $? -ne 0 ] ; then
+        swi_log "UBI: Unable to use block ${ubi_block_num} from ${mtd_dev_num}."
+        ubidetach -m ${mtd_dev_num}
+        return ${SWI_ERR}
+    fi
+
+    wait_for_dev "/dev/ubiblock${ubi_dev_num}_${ubi_block_num}"
+
+    # Mount volume
+    mount -t $parttype /dev/ubiblock${ubi_dev_num}_${ubi_block_num} ${mntpt} -o${UBI_MNTOPT}
+    if [ $? -ne 0 ] ; then
+        swi_log "Unable to mount /dev/ubiblock${ubi_dev_num}_${ubi_block_num} onto ${mntpt}."
+        ubiblkvol --detach /dev/ubi${ubi_dev_num}_${ubi_block_num}
+        ubidetach -m ${mtd_dev_num}
+        ret=${SWI_ERR}
+    fi
+
+    return ${ret}
 }
 
 # Generic function to mount yaffs2 filesystem
@@ -43,6 +97,14 @@ mount_yaffs_fs()
     return ${ret}
 }
 
+# This is required by UFS as well as Legato. It must be executed
+# no matter what.
+mount_early_scratch_start()
+{
+    mount_yaffs_fs ${UFS_MTDEV_NAME} ${FLASH_MOUNTPOINT}
+    return $?
+}
+
 # Unmount scratch file system
 mount_early_scratch_stop()
 {
@@ -58,6 +120,22 @@ mount_early_scratch_stop()
 
 mount_early_legato_start()
 {
+    local mtd_num=2
+
+    if ! [ -e ${FLASH_MOUNTPOINT_LEGATO} ]; then
+        mkdir -p ${FLASH_MOUNTPOINT_LEGATO}
+        if [ $? -ne 0 ]; then
+            swi_log "Unable to create ${FLASH_MOUNTPOINT_LEGATO}"
+            return ${SWI_ERR}
+        fi
+    fi
+
+    # Try to mount ubi first
+    mount_ubi_fs ${LEGATO_MTDEV_NAME} ${FLASH_MOUNTPOINT_LEGATO} squashfs
+    if [ $? -eq ${SWI_OK} ]; then
+        return ${SWI_OK}
+    fi
+
     mount_yaffs_fs ${LEGATO_MTDEV_NAME} ${FLASH_MOUNTPOINT_LEGATO}
     return $?
 }
@@ -74,8 +152,6 @@ mount_early_legato_stop()
 
     return ${ret}
 }
-
-
 
 mount_early_userrw_start()
 {
@@ -183,16 +259,23 @@ mount_early_start()
 	local ret=0
 
     # list of methods to execute
+    local method_list_essential=""
+
+    # Mount essential volumes only if we are not relying on the initramfs
+    if grep 'root=' /proc/cmdline > /dev/null; then
+        method_list_essential="
+                               mount_early_pseudo
+                               mount_early_other
+                               mount_early_create_dirs"
+    fi
+    
     local method_list="
-                       mount_early_pseudo
-                       mount_early_other
-                       mount_early_create_dirs
                        mount_early_scratch_start
                        mount_early_legato_start
                        mount_early_userrw_start
                       "
 
-    for method in ${method_list} ; do
+    for method in ${method_list_essential} ${method_list} ; do
         echo "${this_e}: Executing ${method}... "
         ${method}
         if [ $? -ne 0 ] ; then return 1 ; fi

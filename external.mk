@@ -1,12 +1,4 @@
 
-KBRANCH_mdm9x15 := standard/swi-mdm9x15-yocto-1.6-swi
-KMETA := meta-yocto-1.6-swi
-
-KBRANCH_mdm9x15_REV := $(shell cd kernel && git rev-parse HEAD | cut -c 1-10 -)
-
-KBRANCH_mdm9x15_CURRENT_REV := $(shell cd kernel && git show-ref -s refs/heads/${KBRANCH_mdm9x15} | cut -c 1-10 -)
-KMETA_CURRENT_REV := $(shell cd kernel && git show-ref -s refs/heads/${KMETA} | cut -c 1-10 -)
-
 # Set number of threads
 NUM_THREADS ?= 9
 
@@ -22,11 +14,18 @@ NUM_THREADS ?= 9
 # Example using cgit to fetch from the server (set to 15.01.rc1)
 #LEGATO_REPO := "git://cgit-legato/Legato.git/\;protocol\=http\;rev\=89d4a7c4c53581095103ea2b1212ae35a9b5f6e5"
 
+# Yocto versions
+POKY_VERSION ?= refs/tags/daisy-11.0.2
+META_OE_VERSION ?= 8e6f6e49c99a12a0382e48451f37adac0181362f
+
 # Use docker abstraction ?
 USE_DOCKER ?= 0
 
 # Use distributed building ?
 USE_ICECC ?= 0
+
+# Firmware path pointing to ar_yocto-cwe.tar.bz2
+FIRMWARE_PATH ?= 0
 
 all: image_bin
 
@@ -45,7 +44,11 @@ ifdef LEGATO_REPO
     LEGATO_ARGS := -a "LEGATO_REPO=${LEGATO_REPO}"
 endif
 
-BUILD_SCRIPT := "meta-swi-extras/build.sh" 
+ifneq ($(FIRMWARE_PATH),0)
+    FIRMWARE_PATH_ARGS := -F $(FIRMWARE_PATH)
+endif
+
+BUILD_SCRIPT := "meta-swi-extras/build.sh"
 
 # Provide a docker abstraction for Yocto building, allowing the host seen
 # by the Yocto environment to be the ideal Linux distribution
@@ -74,37 +77,35 @@ COMMON_ARGS := ${BUILD_SCRIPT} \
 				-j $(NUM_THREADS) \
 				-t $(NUM_THREADS) \
 				${ICECC_ARGS} \
-				${LEGATO_ARGS}
+				${LEGATO_ARGS} \
+				${FIRMWARE_PATH_ARGS}
 
 # Machine: swi-mdm9x15
+
+KBRANCH_mdm9x15 := $(shell git --git-dir=kernel/.git branch | grep -oe 'standard/.*')
+KMETA_mdm9x15 := $(shell git --git-dir=kernel/.git branch | grep -oe 'meta-.*')
+
+KBRANCH_mdm9x15_CURRENT_REV := $(shell cd kernel && git show-ref -s refs/heads/${KBRANCH_mdm9x15} | cut -c 1-10 -)
+KMETA_mdm9x15_CURRENT_REV := $(shell cd kernel && git show-ref -s refs/heads/${KMETA_mdm9x15} | cut -c 1-10 -)
 
 COMMON_BIN := \
 				$(COMMON_ARGS) \
 				-m swi-mdm9x15 \
 				-b build_bin \
+				-a KBRANCH_DEFAULT_MDM9X15=${KBRANCH_mdm9x15} \
+				-a KMETA_DEFAULT_MDM9X15=${KMETA_mdm9x15} \
 				-q \
-				-g 
-
-COMMON_SRC := \
-				$(COMMON_ARGS) \
-				-m swi-mdm9x15 \
-				-b build_src \
-				-w $(APPS_DIR) \
-				$(FW_VERSION_ARG) \
-				-q -s \
 				-g
-
-# Machine: swi-mdm9x15
 
 ## extras needed for building
 
 poky:
 	git clone git://git.yoctoproject.org/poky
-	cd poky && git checkout refs/tags/daisy-11.0.2
+	cd poky && git checkout ${POKY_VERSION}
 
 meta-openembedded:
 	git clone git://git.openembedded.org/meta-openembedded
-	cd meta-openembedded && git checkout 8e6f6e49c99a12a0382e48451f37adac0181362f
+	cd meta-openembedded && git checkout ${META_OE_VERSION}
 
 ## images
 

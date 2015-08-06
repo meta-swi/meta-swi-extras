@@ -17,6 +17,9 @@ SRC_URI += "file://makefota"
 SRC_URI += "file://README_CWE.txt"
 SRC_URI += "file://yoctocwetool.sh"
 SRC_URI += "file://COPYING"
+SRC_URI += "file://partition_update.py"
+SRC_URI += "file://yocto_partition_update_cwe.sh"
+SRC_URI += "file://splitboot.c"
 
 S = "${WORKDIR}/"
 
@@ -34,5 +37,8 @@ do_install() {
     install -m 0755 yoctocwetool.sh ${D}${bindir}
     install -m 0755 makefota ${D}${bindir}
     install -m 0644 README_CWE.txt ${D}${bindir}
+    install -m 0755 partition_update.py ${D}${bindir}
+    install -m 0755 yocto_partition_update_cwe.sh ${D}${bindir}
+    install -m 0755 splitboot ${D}${bindir}
 }
 

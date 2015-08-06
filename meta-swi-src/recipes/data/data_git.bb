@@ -13,7 +13,8 @@ EXTRA_OECONF = "--with-lib-path=${STAGING_LIBDIR} \
                 --with-common-includes=${STAGING_INCDIR} \
                 --with-glib \
                 --with-qxdm \
-                WORKSPACE="${WORKSPACE}" \
+                --enable-target=9615-cdp \
+                WORKSPACE='${WORKSPACE}' \
                 "
 export GLIB_LIBS="-lrt"
 
@@ -63,3 +64,4 @@ do_install_append() {
 sysroot_stage_all_append() {
     sysroot_stage_dir ${D}/tmp ${SYSROOT_DESTDIR}${STAGING_DIR_HOST}/tmp
 }
+

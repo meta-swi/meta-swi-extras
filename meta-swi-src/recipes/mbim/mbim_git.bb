@@ -24,7 +24,7 @@ inherit autotools
 EXTRA_OECONF = "--with-common-includes=${STAGING_INCDIR}"
 
 INITSCRIPT_NAME = "mbim"
-INITSCRIPT_PARAMS = "start 45 S . stop 55 S ."
+INITSCRIPT_PARAMS = "start 96 S . stop 4 S ."
 
 inherit update-rc.d
 

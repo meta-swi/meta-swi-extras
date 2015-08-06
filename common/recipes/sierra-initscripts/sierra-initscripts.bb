@@ -7,7 +7,6 @@ SRC_URI = "file://confighw.sh \
            file://swiapplaunch.sh \
            file://varrw.sh \
            file://restart_swi_apps \
-           file://start_dbi_daemon \
            file://restartNMEA \
            file://run.env \
            file://run_getty.sh \
@@ -24,7 +23,6 @@ do_install() {
     install -m 0755 ${WORKDIR}/swiapplaunch.sh -D ${D}${sysconfdir}/init.d/swiapplaunch.sh
     install -m 0755 ${WORKDIR}/varrw.sh -D ${D}${sysconfdir}/init.d/varrw.sh
     install -m 0755 ${WORKDIR}/restart_swi_apps -D ${D}${sbindir}/restart_swi_apps
-    install -m 0755 ${WORKDIR}/start_dbi_daemon -D ${D}${sysconfdir}/init.d/start_dbi_daemon
     install -m 0755 ${WORKDIR}/restartNMEA -D ${D}${sbindir}/restartNMEA
     install -m 0444 ${WORKDIR}/run.env -D ${D}${sysconfdir}/run.env
     install -m 0755 ${WORKDIR}/run_getty.sh -D ${D}${sysconfdir}/init.d/run_getty.sh
@@ -43,8 +41,6 @@ do_install() {
     update-rc.d $OPT swiapplaunch.sh start 80 S . stop 20 S .
     update-rc.d $OPT -f varrw.sh remove
     update-rc.d $OPT varrw.sh start 36 S . stop 64 S .
-    update-rc.d $OPT -f start_dbi_daemon remove
-    update-rc.d $OPT start_dbi_daemon start 82 S . stop 18 S .
     update-rc.d $OPT -f enable_autosleep.sh remove
     update-rc.d $OPT enable_autosleep.sh start 99 S . stop 01 S .
 }

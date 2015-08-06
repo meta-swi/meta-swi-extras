@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<partitions>
+    <partition>
+        <name length="16" type="string">0:APPSBL</name>
+            <size_kb length="4">768</size_kb>
+            <pad_kb length="4">50</pad_kb>
+    </partition>
+    <partition>
+        <name length="16" type="string">0:APPS</name>
+        <size_kb length="4">20000</size_kb>
+        <pad_kb length="4">384</pad_kb>
+    </partition>
+    <partition>
+        <name length="16" type="string">0:SYSTEM</name>
+        <size_kb length="4">50000</size_kb>
+        <pad_kb length="4">300</pad_kb>
+    </partition>
+    <partition>
+        <name length="16" type="string">0:USERDATA</name>
+        <size_kb length="4">38000</size_kb>
+        <pad_kb length="4">2560</pad_kb>
+    </partition>
+    <partition>
+        <name length="16" type="string">0:USERAPP</name>
+        <size_kb length="4">152000</size_kb>
+        <pad_kb length="4">384</pad_kb>
+    </partition>
+</partitions>

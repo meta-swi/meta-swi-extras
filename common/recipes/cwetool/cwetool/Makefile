@@ -4,10 +4,10 @@
 
 CXX ?= g++
 
-all: fotapkghdrcat cwezip hdrcnv
+all: fotapkghdrcat cwezip hdrcnv splitboot
 
 clean:
-	rm cwezip fotapkghdrcat hdrcnv
+	rm cwezip fotapkghdrcat hdrcnv splitboot
 
 cwezip: cwezip.cpp
 	$(CXX) -o $@ $< -lz
@@ -18,3 +18,5 @@ fotapkghdrcat: fotapkghdrcat.cpp
 hdrcnv: hdrcnv.cpp
 	$(CXX) -o $@ $<
 
+splitboot: splitboot.c
+	$(CC) -o $@ $<

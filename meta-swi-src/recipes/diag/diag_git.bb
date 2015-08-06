@@ -21,7 +21,7 @@ EXTRA_OECONF += "--with-glib \
 
 
 INITSCRIPT_NAME = "chgrp-diag"
-INITSCRIPT_PARAMS = "start 15 S ."
+INITSCRIPT_PARAMS = "start 95 S ."
 
 inherit proprietary-qcom
 

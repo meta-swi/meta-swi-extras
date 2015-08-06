@@ -30,10 +30,10 @@ at least fast boot image, root fs, kernel image are needed to generate yocto cwe
 TOOLDIR=`dirname $0`
 OUTFILE=`pwd`/yocto.cwe
 OUTZFILE=`pwd`/yoctoz.cwe
-RFS_FILE="rootfs"
+RFS_FILE=""
 UFS_FILE=""
 FBT_FILE=""
-KERNEL_FILE="kernel"
+KERNEL_FILE=""
 
 # create a symlink hdrcnv to the real hdrcnv utility
 HDRCNV=""
@@ -85,14 +85,17 @@ until [ -z "$1" ]  # Until all parameters used up...
           shift
           KERNEL_FILE=$1
           ;;
+
       "-pid" | "-PID")        # kernel image
           shift
           PKID=$1
           ;;
+
       "-h" | "--h")        # kernel image
           echo -e $USAGE
           exit 1
           ;;
+          
       *)
           echo -e "unrecognized argument: $1\n"
           echo -e $USAGE

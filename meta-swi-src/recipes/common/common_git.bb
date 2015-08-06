@@ -20,6 +20,8 @@ do_install () {
         install -m 0644 ${S}/customer.h ${D}${includedir}/
         install -m 0644 ${S}/stringl.h ${D}${includedir}/
         install -m 0644 ${S}/target.h ${D}${includedir}/
+        [ -e "${S}/common_log.h" ] && install -m 0644 ${S}/common_log.h ${D}${includedir}/
+        [ -e "${S}/rex.h" ] && install -m 0644 ${S}/rex.h ${D}${includedir}/
 }
 
 inherit proprietary-qcom

@@ -48,6 +48,7 @@ $0 <options ...>
     -s (enable Qualcomm Proprietary source)
     -w <Qualcomm source directory (apps_proc)>
     -v <version of Qualcomm sources>
+    -F <path to ar_yocto-cwe.tar.bz2>
 
   Task control:
     -c (enable command line mode)
@@ -66,9 +67,22 @@ if [ $# = 0 ]; then
     usage_and_exit 1
 fi
 
-BD="$scriptdir/../build" MACH=swi-mdm9x15 DEBUG=false TASKS=4 THREADS=4 CMD_LINE=false TOOLCHAIN=false ENABLE_RT=false ENABLE_PROPRIETARY=false ENABLE_PROPRIETARY_SRC=false ENABLE_ICECC=false DISTRO=poky-swi
+# Default options
+BD="$scriptdir/../build"
+MACH=swi-mdm9x15
+DEBUG=false
+TASKS=4
+THREADS=4
+CMD_LINE=false
+TOOLCHAIN=false
+ENABLE_RT=false
+ENABLE_PROPRIETARY=false
+ENABLE_PROPRIETARY_SRC=false
+ENABLE_ICECC=false
+DISTRO=poky-swi
+X_OPTS=
 
-while getopts ":p:o:b:l:x:m:t:j:w:v:a:cdrqsgkh" arg
+while getopts ":p:o:b:l:x:m:t:j:w:v:a:F:cdrqsgkh" arg
 do
     case $arg in
     p)
@@ -108,8 +122,8 @@ do
         echo "Number of make threads $THREADS"
         ;;
     a)
-        X_OPTS=$OPTARG
-        echo "Extra options added -  $X_OPTS"
+        X_OPTS="$X_OPTS $OPTARG"
+        echo "Extra options added -  $OPTARG"
         ;;
     c)  CMD_LINE=true
         echo "Enable command line mode"
@@ -128,9 +142,11 @@ do
         ;;
     v)
         FW_VERSION=$OPTARG
+        echo "FW Version: $FW_VERSION"
         ;;
     g)
         DEF_LEGATO="true"
+        echo "With Legato"
         ;;
     k)  TOOLCHAIN=true
         echo "Build toolchain"
@@ -138,6 +154,9 @@ do
     h)  ENABLE_ICECC=true
         echo "Build using icecc"
         ;;
+    F)  FIRMWARE_PATH=$(readlink -f $OPTARG)
+        echo "Use FIRWARE_PATH=${FIRMWARE_PATH} to fetch ar_yocto-cwe.tar.bz2 binary"
+	;;
     ?)
         echo "$0: invalid option -$OPTARG" 1>&2
         usage_and_exit 1
@@ -263,14 +282,32 @@ fi
 
 ## Conf: local.conf
 
+set_option() {
+    opt_name=$1
+    opt_val=$2
+
+    if grep "$opt_name =" $BD/conf/local.conf > /dev/null; then
+        # Update entry
+        echo "Updating $opt_name to $opt_val"
+        sed -e "s/$opt_name = \".*//g" -i $BD/conf/local.conf
+        echo "$opt_name = \"$opt_val\"" >> $BD/conf/local.conf
+    else
+        # Append
+        echo "Adding option $opt_name with value $opt_val"
+        echo "$opt_name = \"$opt_val\"" >> $BD/conf/local.conf
+    fi
+}
+
 # Tune local.conf file
 sed -e 's:^\(MACHINE\).*:\1 = \"'$MACH'\":' -i $BD/conf/local.conf
 grep -E "SOURCE_MIRROR_URL" $BD/conf/local.conf > /dev/null
 if [ $? != 0 ]; then
-        sed -e '/^#DL_DIR/a\SOURCE_MIRROR_URL ?= \"file\:\/\/'"$scriptdir"'/downloads\"\nINHERIT += \"own-mirrors\"\nBB_GENERATE_MIRROR_TARBALLS = \"1\"\nBB_NO_NETWORK = \"0\"\nWORKSPACE = \"'"${WORKSPACE}"'\"\nLINUX_REPO_DIR = \"'"${LINUXDIR}"'\"\nLEGATO_BUILD = \"'"${DEF_LEGATO}"'\"\nDISTRO = \"'"${DISTRO}"'\"' -i $BD/conf/local.conf
+        sed -e '/^#DL_DIR/a\SOURCE_MIRROR_URL ?= \"file\:\/\/'"$scriptdir"'/downloads\"\nINHERIT += \"own-mirrors\"\nBB_GENERATE_MIRROR_TARBALLS = \"1\"\nBB_NO_NETWORK = \"0\"\nWORKSPACE = \"'"${WORKSPACE}"'\"\nLINUX_REPO_DIR = \"'"${LINUXDIR}"'\"\nDISTRO = \"'"${DISTRO}"'\"' -i $BD/conf/local.conf
 fi
 sed -e 's:^#\(BB_NUMBER_THREADS\).*:\1 = \"'"$TASKS"'\":' -i $BD/conf/local.conf
 sed -e 's:^#\(PARALLEL_MAKE\).*:\1 = \"-j '"$THREADS"'\":' -i $BD/conf/local.conf
+
+set_option "LEGATO_BUILD" $DEF_LEGATO
 
 if [ -n "$FW_VERSION" ]; then
     FW_VERSION_ENTRY=$(grep "FW_VERSION =" $BD/conf/local.conf)
@@ -298,20 +335,9 @@ then
         opt_name=$(echo $OPT | cut -d"=" -f1)
         opt_val=$(echo $OPT | cut -d"=" -f2-)
 
-        OPT_ENTRY=$(grep "$opt_name =" $BD/conf/local.conf)
-        if [ $? != 0 ]; then
-            # Append
-            echo "Adding option $opt_name with value $opt_val"
-            echo "$opt_name = \"$opt_val\"" >> $BD/conf/local.conf
-        else
-            # Update entry
-            echo "Updating $opt_name to $opt_val"
-            sed -e "s/$opt_name = \".*//g" -i $BD/conf/local.conf
-            echo "$opt_name = \"$opt_val\"" >> $BD/conf/local.conf
-        fi
+        set_option $opt_name $opt_val
     done
 fi
-
 
 if [ $ENABLE_RT = true ]; then
     grep -E "PREFERRED_PROVIDER_virtual\/kernel" $BD/conf/local.conf > /dev/null
@@ -329,6 +355,7 @@ else
     fi
 fi
 
+# IceCC
 if [ $ENABLE_ICECC = true ]; then
     if ! grep icecc $BD/conf/local.conf > /dev/null; then
         echo 'INHERIT += "icecc"' >> $BD/conf/local.conf
@@ -337,12 +364,27 @@ if [ $ENABLE_ICECC = true ]; then
     fi
 fi
 
+# Initramfs
+if test $MACH = "swi-mdm9x15"; then
+    sed '/INITRAMFS_IMAGE_BUNDLE/d' -i $BD/conf/local.conf
+    echo 'INITRAMFS_IMAGE_BUNDLE = "1"' >> $BD/conf/local.conf
+
+    sed '/INITRAMFS_IMAGE /d' -i $BD/conf/local.conf
+    echo 'INITRAMFS_IMAGE = "mdm9x15-image-initramfs"' >> $BD/conf/local.conf
+fi
+
+# Firmware Path
+sed '/FIRMWARE_PATH/d' -i $BD/conf/local.conf
+if [ -n "$FIRMWARE_PATH" ]; then
+    echo 'FIRMWARE_PATH = "'${FIRMWARE_PATH}'"' >>$BD/conf/local.conf
+fi
+
 cd $BD
 
 # Command line
 if [ $CMD_LINE = true ]; then
     /bin/bash
-    exit 0
+    exit $?
 fi
 
 # Toolchain
