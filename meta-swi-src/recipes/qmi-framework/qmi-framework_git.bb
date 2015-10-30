@@ -1,3 +1,5 @@
+inherit autotools pkgconfig
+
 DESCRIPTION = "QMI Framework Library"
 LICENSE = "QUALCOMM-Proprietary"
 LIC_FILES_CHKSUM = "file://${WORKSPACE}/oe-core/meta-qcom/files/qcom-licenses/\
@@ -12,9 +14,9 @@ DEPENDS = "qmi"
 
 EXTRA_OECONF = "--with-qmux-libraries=${STAGING_LIBDIR}"
 
-inherit autotools
-
 S = "${WORKDIR}/qmi-framework"
+
+EXTRA_OEMAKE = "INCLUDES='-I${S}/{inc,qcci/inc,common/inc,smem_log,qcsi/inc}'"
 
 inherit proprietary-qcom
 

@@ -1,4 +1,4 @@
-inherit autotools
+inherit autotools pkgconfig
 
 DESCRIPTION = "Qualcomm Data DSutils Module"
 HOMEPAGE = "http://support.cdmatech.com"
@@ -12,6 +12,8 @@ EXTRA_OECONF = "--with-lib-path=${STAGING_LIBDIR} \
                 --with-common-includes=${STAGING_INCDIR} \
                 --with-glib \
                 --with-qxdm"
+
+EXTRA_OEMAKE = "INCLUDES='-I${S}/inc'"
 
 FILESEXTRAPATHS_prepend := "${WORKSPACE}/data:"
 

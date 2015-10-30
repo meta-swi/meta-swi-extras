@@ -11,10 +11,27 @@
 #define EPOLL_DEV "/dev/usb_link"
 #define MAX_EPOLL 1
 
+static int wake_lock_unlock(int link_status, char *wake_lock)
+{
+	int wf, rv;
+
+	/* select sysfs file based on current link status */
+	wf = open((link_status ? WLOCK_FILE : WUNLOCK_FILE), O_RDWR);
+	if (wf < 0) {
+		perror("open");
+		return -1;
+	}
+	rv = write(wf, wake_lock, strlen(wake_lock));
+	if (rv < 0)
+		perror("write");
+	close(wf);
+
+	return (rv < 0 ? -1 : 0);
+}
+
 int main(int argc, char *argv[])
 {
 	int fd, epoll_fd, wf;
-	int previous_status;
 	FILE *rs;
 	struct epoll_event ev, events[MAX_EPOLL];
 	char *epoll_dev = EPOLL_DEV;
@@ -22,6 +39,11 @@ int main(int argc, char *argv[])
 	if (argc > 1)
 		epoll_dev = argv[1];
 
+	/* start by assuming link is up, acquire wake lock */
+	if (wake_lock_unlock(1, epoll_dev) < 0)
+		exit(EXIT_FAILURE);
+
+	/* create epoll event */
 	fd = open(epoll_dev, O_RDONLY);
 	if (fd < 0) {
 		perror("open");
@@ -40,11 +62,10 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	/* start by assuming link was down */
-        previous_status = 0;
 	while (1) {
 		int nevents, rv, link_status;
 
+		/* read initial link status */
 		rv = read(fd, &link_status, sizeof(link_status));
 		if (rv != sizeof(link_status)) {
 			perror("read");
@@ -53,23 +74,8 @@ int main(int argc, char *argv[])
 		printf("%s: link is %s\n", epoll_dev,
 			(link_status ? "UP" : "DOWN"));
 
-		/* this check may only fall through in the first iteration */
-		if (previous_status != link_status) {
-			/* select sysfs file based on current link status */
-			wf = open((link_status ? WLOCK_FILE : WUNLOCK_FILE),
-				  O_RDWR);
-			if (wf < 0) {
-				perror("open");
-				exit(EXIT_FAILURE);
-			}
-			rv = write(wf, epoll_dev, strlen(epoll_dev));
-			if (rv < 0) {
-				perror("write");
-				exit(EXIT_FAILURE);
-			}
-			close(wf);
-			previous_status = link_status;
-		}
+		if (wake_lock_unlock(link_status, epoll_dev) < 0)
+			exit(EXIT_FAILURE);
 
 		printf("waiting for EPOLLWAKEUP...\n");
 		nevents = 0;

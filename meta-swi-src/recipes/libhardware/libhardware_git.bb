@@ -1,3 +1,5 @@
+inherit autotools pkgconfig
+
 DESCRIPTION = "hardware libhardware headers"
 HOMEPAGE = "http://codeaurora.org/"
 LICENSE = "Apache-2.0"
@@ -15,9 +17,9 @@ SRC_URI = " \
 
 S = "${WORKDIR}/${PN}"
 
-DEPENDS = "system-core"
+EXTRA_OEMAKE = "INCLUDES='-I${S}/include'"
 
-inherit autotools
+DEPENDS = "system-core"
 
 do_install_append () {
         install -d ${D}${includedir}

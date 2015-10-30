@@ -1,4 +1,4 @@
-inherit autotools
+inherit autotools pkgconfig
 
 DESCRIPTION = "libaudioalsa Library"
 LICENSE = "QUALCOMM-Proprietary"
@@ -13,6 +13,8 @@ FILESEXTRAPATHS_prepend := "${WORKSPACE}/:"
 SRC_URI = "file://mm-audio/audio-alsa"
 
 S = "${WORKDIR}/audio-alsa"
+
+EXTRA_OEMAKE = "INCLUDES='-I${S}/inc'"
 
 EXTRA_OECONF += "--with-sanitized-headers=${STAGING_KERNEL_DIR}/include \
                  --with-glib"

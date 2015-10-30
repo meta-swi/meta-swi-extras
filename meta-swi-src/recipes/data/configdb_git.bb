@@ -1,4 +1,4 @@
-inherit autotools
+inherit autotools pkgconfig
 
 DESCRIPTION = "Qualcomm Data Configdb Module"
 HOMEPAGE = "http://support.cdmatech.com"
@@ -18,6 +18,8 @@ FILESEXTRAPATHS_prepend := "${WORKSPACE}/data:"
 SRC_URI = "file://configdb"
 
 S = "${WORKDIR}/configdb"
+
+EXTRA_OEMAKE = "INCLUDES='-I${S}/inc'"
 
 inherit proprietary-qcom
 

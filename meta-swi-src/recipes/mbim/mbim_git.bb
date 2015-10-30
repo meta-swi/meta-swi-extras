@@ -19,9 +19,11 @@ SRC_URI = "file://mbim"
 
 S = "${WORKDIR}/mbim"
 
-inherit autotools
+inherit autotools pkgconfig
 
 EXTRA_OECONF = "--with-common-includes=${STAGING_INCDIR}"
+
+EXTRA_OEMAKE = " INCLUDES='-I${S}/{qmi_svc/api,wmsts/api} -I${srcdir}/{inc,api,svc/inc} -I${srcdir}/platform/{inc,api} -I${srcdir}/framework/inc' "
 
 INITSCRIPT_NAME = "mbim"
 INITSCRIPT_PARAMS = "start 96 S . stop 4 S ."

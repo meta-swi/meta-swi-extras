@@ -9,7 +9,7 @@ FILESEXTRAPATHS_prepend := "${WORKSPACE}/:"
 
 SRC_URI = "file://diag-reboot-app"
 
-inherit autotools
+inherit autotools pkgconfig
 
 S = "${WORKDIR}/diag-reboot-app"
 

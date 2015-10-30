@@ -1,4 +1,4 @@
-inherit autotools
+inherit autotools pkgconfig
 
 DESCRIPTION = "Time Services Daemon"
 LICENSE = "QUALCOMM-Proprietary"
@@ -18,8 +18,8 @@ S = "${WORKDIR}/time-services"
 # override default install if starting time_serived by time_services. Remove the following
 # to have time_serviced itself be started at boot.
 do_install () {
-    install -D -m 0755 ${WORKDIR}/time-services/time_serviced -D ${D}${sysconfdir}/init.d/time_serviced
-    install -D -m 0755 ${WORKDIR}/time-services/time_daemon -D ${D}${bindir}/time_daemon
+    install -D -m 0755 ${WORKDIR}//time-services/time_serviced -D ${D}${sysconfdir}/init.d/time_serviced
+    install -D -m 0755 ${WORKDIR}/build/time_daemon -D ${D}${bindir}/time_daemon
 }
 
 # uncomment the following if not using sierra time_services

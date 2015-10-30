@@ -1,4 +1,4 @@
-inherit autotools
+inherit autotools pkgconfig
 
 DESCRIPTION = "Library and routing applications for diagnostic traffic"
 HOMEPAGE = "http://support.cdmatech.com"
@@ -19,6 +19,7 @@ S = "${WORKDIR}/diag"
 EXTRA_OECONF += "--with-glib \
                  --with-common-includes=${STAGING_INCDIR}"
 
+EXTRA_OEMAKE = "INCLUDES='-I${S}/include -I${S}/src'"
 
 INITSCRIPT_NAME = "chgrp-diag"
 INITSCRIPT_PARAMS = "start 95 S ."

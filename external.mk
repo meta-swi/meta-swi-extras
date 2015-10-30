@@ -15,8 +15,8 @@ NUM_THREADS ?= 9
 #LEGATO_REPO := "git://cgit-legato/Legato.git/\;protocol\=http\;rev\=89d4a7c4c53581095103ea2b1212ae35a9b5f6e5"
 
 # Yocto versions
-POKY_VERSION ?= refs/tags/daisy-11.0.2
-META_OE_VERSION ?= 8e6f6e49c99a12a0382e48451f37adac0181362f
+POKY_VERSION ?= ab4cc02bf87c1b78933c221a29f187d05427ed08
+META_OE_VERSION ?= 5b6f39ce325d490fc382d5d59c5b8b9d5fa38b38
 
 # Use docker abstraction ?
 USE_DOCKER ?= 0

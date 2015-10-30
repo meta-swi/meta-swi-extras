@@ -1,4 +1,4 @@
-inherit autotools
+inherit autotools pkgconfig
 
 DESCRIPTION = "GPS Location API"
 PR = "r3"
@@ -16,6 +16,8 @@ EXTRA_OECONF = "--with-libhardware-includes=${STAGING_INCDIR} \
                 --with-glib"
 
 S = "${WORKDIR}/gps"
+
+EXTRA_OEMAKE += " INCLUDES='-I${S}/utils -I${srcdir}/../libloc_api_50001 -I${S}/platform_lib_abstractions -I${S}/loc_api/libloc_api_50001/ -I${S}/loc_api/loc_api_v02 -I${S}/loc_api/ulp/inc/' "
 
 inherit proprietary-qcom
 

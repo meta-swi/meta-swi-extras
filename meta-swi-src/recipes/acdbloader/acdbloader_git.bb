@@ -1,4 +1,4 @@
-inherit autotools
+inherit autotools pkgconfig
 
 DESCRIPTION = "acdb loader Library"
 LICENSE = "QUALCOMM-Proprietary"
@@ -11,6 +11,12 @@ FILESEXTRAPATHS_prepend := "${WORKSPACE}/mm-audio/audio-acdb-util/:"
 
 SRC_URI = "file://acdb-loader"
 S = "${WORKDIR}/acdb-loader"
+
+# DM, FIXME: inc/8960 was pulled from Makefile file. However, there is
+# inc/8660 directory which also contains acdb-loader-def.h file, but it is not
+# used anywhere. It would be far better that developers use 8960/acdb-loader-def.h
+# or 8660/acdb-loader-def.h with ifdef in order to avoid any ambiguity.
+EXTRA_OEMAKE = "INCLUDES='-I${S} -I${S}/inc -I${S}/inc/8960'"
 
 inherit proprietary-qcom
 

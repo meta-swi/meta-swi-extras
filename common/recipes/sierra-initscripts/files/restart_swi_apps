@@ -87,5 +87,13 @@ do
        /etc/init.d/startm2m.sh monitor
     fi
   fi
+
+  if [ -z "$(ps -e | grep -v grep | grep "swisync")" ]; then
+    if [ -x /usr/bin/swisync ]; then
+      echo "swisync killed, restart it"
+      /usr/bin/swisync > /dev/null 2>&1 &
+    fi
+  fi
+
   DELAY=5
 done

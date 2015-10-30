@@ -27,7 +27,7 @@ dd if=boot_update_yocto_$TARGET.cwe >full_update_yocto_$TARGET.bin
 [ $? -ne 0 ] && exit 1
 dd if=modemz.cwe >>full_update_yocto_$TARGET.bin
 [ $? -ne 0 ] && exit 1
-dd if=yocto-legato_$TARGET.cwe >>full_update_yocto_$TARGET.bin
+dd if=boot-yocto-legato_$TARGET.cwe >>full_update_yocto_$TARGET.bin
 [ $? -ne 0 ] && exit 1
 
 hdrcnv full_update_yocto_$TARGET.bin -OH full_update_yocto_$TARGET.hdr -IT SPKG -PT A911 -V "$TAG2" -B 00000001

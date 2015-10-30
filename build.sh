@@ -186,10 +186,7 @@ enable_layer()
     fi
 }
 
-if test $MACH = "swi-s6"; then
-    # Enable the meta-swi-s6 layer
-    enable_layer "meta-swi-s6" "$SWI/meta-swi-s6"
-elif test $MACH = "swi-virt-arm" || test $MACH = "swi-virt-x86"; then
+if test $MACH = "swi-virt-arm" || test $MACH = "swi-virt-x86"; then
     # Enable the meta-swi-virt layer
     enable_layer "meta-swi-virt" "$SWI/meta-swi-virt"
 else
@@ -208,6 +205,9 @@ enable_layer "meta-oe" "$OE/meta-oe"
 
 # Enable the meta-networking layer
 enable_layer "meta-networking" "$OE/meta-networking"
+
+# Enable the meta-python layer
+enable_layer "meta-python" "$OE/meta-python"
 
 # Enable proprietary layers: from sources
 if [ $ENABLE_PROPRIETARY_SRC = true ]; then
@@ -302,7 +302,7 @@ set_option() {
 sed -e 's:^\(MACHINE\).*:\1 = \"'$MACH'\":' -i $BD/conf/local.conf
 grep -E "SOURCE_MIRROR_URL" $BD/conf/local.conf > /dev/null
 if [ $? != 0 ]; then
-        sed -e '/^#DL_DIR/a\SOURCE_MIRROR_URL ?= \"file\:\/\/'"$scriptdir"'/downloads\"\nINHERIT += \"own-mirrors\"\nBB_GENERATE_MIRROR_TARBALLS = \"1\"\nBB_NO_NETWORK = \"0\"\nWORKSPACE = \"'"${WORKSPACE}"'\"\nLINUX_REPO_DIR = \"'"${LINUXDIR}"'\"\nDISTRO = \"'"${DISTRO}"'\"' -i $BD/conf/local.conf
+        sed -e '/^#DL_DIR/a\SOURCE_MIRROR_URL ?= \"file\:\/\/'"$scriptdir"'/../downloads\"\nINHERIT += \"own-mirrors\"\nBB_GENERATE_MIRROR_TARBALLS = \"1\"\nBB_NO_NETWORK = \"0\"\nWORKSPACE = \"'"${WORKSPACE}"'\"\nLINUX_REPO_DIR = \"'"${LINUXDIR}"'\"\nDISTRO = \"'"${DISTRO}"'\"' -i $BD/conf/local.conf
 fi
 sed -e 's:^#\(BB_NUMBER_THREADS\).*:\1 = \"'"$TASKS"'\":' -i $BD/conf/local.conf
 sed -e 's:^#\(PARALLEL_MAKE\).*:\1 = \"-j '"$THREADS"'\":' -i $BD/conf/local.conf
@@ -376,7 +376,7 @@ fi
 # Firmware Path
 sed '/FIRMWARE_PATH/d' -i $BD/conf/local.conf
 if [ -n "$FIRMWARE_PATH" ]; then
-    echo 'FIRMWARE_PATH = "'${FIRMWARE_PATH}'"' >>$BD/conf/local.conf
+    echo 'FIRMWARE_PATH = "'${FIRMWARE_PATH}'"' >> $BD/conf/local.conf
 fi
 
 cd $BD
@@ -402,9 +402,7 @@ echo -n "Build image of "
 if [ $DEBUG = true ]; then
     echo "dev rootfs (for $MACH)."
     sed -e 's:^\(PACKAGE_CLASSES\).*:\1 = \"package_rpm\":' -i $BD/conf/local.conf
-    if test $MACH = "swi-s6"; then
-        bitbake swi-s6-image-dev
-    elif test $MACH = "swi-virt-arm" || test $MACH = "swi-virt-x86"; then
+    if test $MACH = "swi-virt-arm" || test $MACH = "swi-virt-x86"; then
         bitbake swi-virt-image-dev
     else
         bitbake mdm9x15-image-dev
@@ -412,9 +410,7 @@ if [ $DEBUG = true ]; then
 else
     echo "minimal rootfs (for $MACH)."
     sed -e 's:^\(PACKAGE_CLASSES\).*:\1 = \"package_ipk\":' -i $BD/conf/local.conf
-    if test $MACH = "swi-s6"; then
-        bitbake swi-s6-image-minimal
-    elif test $MACH = "swi-virt-arm" || test $MACH = "swi-virt-x86"; then
+    if test $MACH = "swi-virt-arm" || test $MACH = "swi-virt-x86"; then
         echo "No minimal image for $MACH."
         exit 1
     else

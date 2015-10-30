@@ -67,7 +67,7 @@ do_generate_version_file() {
 
     # poky
     poky_dir=$(echo ${BBLAYERS} |tr ' ' '\n' |grep poky |head -1)
-    VERSION_poky=$(cd $poky_dir && git describe --tags)
+    VERSION_poky=$(cd $poky_dir && git describe --tags --match="yocto*")
 
     # meta-oe
     meta_oe_dir=$(echo ${BBLAYERS} |tr ' ' '\n' |grep -E "meta-oe$")
@@ -99,6 +99,15 @@ do_generate_version_file() {
     VERSION_kernel_meta="$kernel_meta_rev"
     VERSION_kernel_machine="$kernel_machine_rev"
 
+    if [[ "${PREFERRED_PROVIDER_virtual/kernel}" == "linux-yocto" ]]; then
+        VERSION_kernel=$(echo ${PREFERRED_VERSION_linux-yocto} | sed 's/%//g')
+    fi
+
+    if [ -z "$VERSION_kernel" ]; then
+        echo "Unable to determine kernel version"
+        exit 1
+    fi
+
     rm -f $DST
     echo -e "Build created at $(date)" >> $DST
     echo -e "" >> $DST
@@ -111,8 +120,8 @@ do_generate_version_file() {
     echo -e " - meta-openembedded: ${VERSION_meta_oe}" >> $DST
     echo -e " - meta-swi: ${VERSION_meta_swi}" >> $DST
     echo -e " - meta-swi-extras: ${VERSION_meta_swi_extras}" >> $DST
-    echo -e " - linux-yocto-3.4/meta: ${VERSION_kernel_meta}" >> $DST
-    echo -e " - linux-yocto-3.4/machine: ${VERSION_kernel_machine}" >> $DST
+    echo -e " - ${PREFERRED_PROVIDER_virtual/kernel}-${VERSION_kernel}/meta: ${VERSION_kernel_meta}" >> $DST
+    echo -e " - ${PREFERRED_PROVIDER_virtual/kernel}-${VERSION_kernel}/machine: ${VERSION_kernel_machine}" >> $DST
 
     cat $DST
 }

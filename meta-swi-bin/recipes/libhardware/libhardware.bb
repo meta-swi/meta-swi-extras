@@ -15,6 +15,8 @@ DEPENDS = "system-core"
 
 inherit autotools
 
+EXTRA_OEMAKE = "INCLUDES='-I${WORKDIR}/libhardware/include'"
+
 do_install_append () {
         install -d ${D}${includedir}
         install -m 0644 ${S}/include/hardware/gps.h -D ${D}${includedir}/hardware/gps.h

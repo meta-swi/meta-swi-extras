@@ -43,6 +43,9 @@ if [ -z "$usb_modes" ]
 then
   exit 0
 else
+  # Remove duplicate entries
+  usb_modes=$(echo $usb_modes | xargs -n1 | sort -u | xargs)
+
   for usb_mode in $usb_modes
   do
     echo $usb_mode

@@ -1,4 +1,4 @@
-inherit autotools
+inherit autotools pkgconfig
 
 DESCRIPTION = "Sierra Wireless Library"
 HOMEPAGE = "http://www.sierrawireless.com"
@@ -45,6 +45,8 @@ EXTRA_OECONF = "--with-lib-path=${STAGING_LIBDIR} \
                "
 
 EXTRA_OEMAKE = " WORKSPACE=${WORKSPACE} "
+
+EXTRA_OEMAKE += " INCLUDES='-I${S}/. -I${S}/{aa,ar,at,av,bs,bc,dx,dx/common,nv,nv/common,os,sl,ql,er,ic,mm,pi,cr,ts,pc,fm,qapi,qapi/common,mt,sc,lx,su,sd,flogger,qcsi,ud,mci}' "
 
 # Tell bitbake that we built another packages as well
 # .. and assign files to these packages

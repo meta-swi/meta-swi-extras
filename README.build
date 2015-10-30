@@ -10,34 +10,33 @@ Table of Contents
 
 1.1 Clone necessary git trees:
 
-Clone poky from yocto website and switch to the yocto-1.6.1 tag:
+Clone poky from yocto website and switch to the following commit:
 
 	$ git clone git://git.yoctoproject.org/poky.git
 	$ cd poky
-	$ git checkout -b yocto-1.6.1-local 30b8d9378b8260e452552b806610dc9b6fe0b69f
+	$ git checkout -b yocto-1.7-local ec75238f6cc2d2d8d40e0268f6d2acc070cbe9a4
 	$ cd ../
 
-Clone meta-openembedded and switch to the following commit 
-8e6f6e49c99a12a0382e48451f37adac0181362f (git checkout -b yocto-1.6.1-local origin/daisy on september 30, 2014):
+Clone meta-openembedded and switch to the following commit: 
 
 	$ git clone git://git.openembedded.org/meta-openembedded
 	$ cd meta-openembedded
-	$ git checkout -b yocto-1.6.1-local 8e6f6e49c99a12a0382e48451f37adac0181362f
+	$ git checkout -b yocto-1.7-local 30438e7690a7e44ce216478c0352a3fbf3b572fb
 	$ cd ../
 
-1.2 Clone git trees from github and switch to yocto-1.6 branch when necessary:
+1.2 Clone git trees from github and switch to yocto-1.7 branch when necessary:
 
 	$ git clone https://github.com/MalvernPark/meta-swi.git
 	$ cd meta-swi
-	$ git checkout -b yocto-1.6 origin/yocto-1.6 
+	$ git checkout -b yocto-1.7 origin/yocto-1.7 
 	$ cd ../
 	
 	$ git clone https://github.com/MalvernPark/meta-swi-extras.git
 	$ cd meta-swi-extras
-	$ git checkout -b yocto-1.6 origin/yocto-1.6
+	$ git checkout -b yocto-1.7 origin/yocto-1.7
 	$ cd ../
 
-	$ git clone --bare https://github.com/MalvernPark/linux-yocto-3.4.git
+	$ git clone --bare https://github.com/MalvernPark/linux-yocto-3.14.git
 
 1.3 Enter the cloned meta-swi-extras directory to build bsp project:
 
@@ -80,13 +79,8 @@ Notes:
 
 1.5 Examples of using the build.sh script to kick off build:
 
-To allow maximum 9 bitbake tasks and 9 make threads, and build an swi-s6 image
+To allow maximum 9 bitbake tasks and 9 make threads, and build an swi-mdm9x15 image
 for debugging purpose:
-
-	$ ./build.sh -p ../poky/ -o ../meta-openembedded/ \
-	  -l ../meta-swi -m swi-s6 -t 9 -j 9 -d
-
-or build a swi-mdm9x15 image:
 
 	$ ./build.sh -p ../poky/ -o ../meta-openembedded/ \
 	  -l ../meta-swi -m swi-mdm9x15 -q -t 9 -j 9 -d
@@ -94,7 +88,7 @@ or build a swi-mdm9x15 image:
 To enter the command line mode:
 
 	$ ./build.sh -p ../poky/ -o ../meta-openembedded/ \
-	  -l ../meta-swi -m swi-s6 -t 9 -j 9 -c
+	  -l ../meta-swi -m swi-mdm9x15 -q -t 9 -j 9 -c
 
 To build a preempt-rt kernel:
 
@@ -105,17 +99,15 @@ More examples:
 
 standard:
 ./build.sh -p ../poky/ -o ../meta-openembedded/ -l ../meta-swi -m swi-mdm9x15 -q -t 4 -j 4 -d
-./build.sh -p ../poky/ -o ../meta-openembedded/ -l ../meta-swi -m swi-s6 -q -t 4 -j 4 -d
 minimal:
 ./build.sh -p ../poky/ -o ../meta-openembedded/ -l ../meta-swi -m swi-mdm9x15 -q -t 4 -j 4
-./build.sh -p ../poky/ -o ../meta-openembedded/ -l ../meta-swi -m swi-s6 -q -t 4 -j 4
 preempt-rt:
 ./build.sh -p ../poky/ -o ../meta-openembedded/ -l ../meta-swi -m swi-mdm9x15 -q -t 4 -j 4 -d -r
 shell:
 ./build.sh -p ../poky/ -o ../meta-openembedded/ -l ../meta-swi -m swi-mdm9x15 -q -t 4 -j 4 -c
-./build.sh -p ../poky/ -o ../meta-openembedded/ -l ../meta-swi -m swi-s6 -q -t 4 -j 4 -c
 
 2. Other notes
 --------------
 For more yocto reference, please check the yocto websit:
 http://www.yoctoproject.org
+

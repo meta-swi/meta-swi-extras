@@ -12,7 +12,7 @@ FILESEXTRAPATHS_prepend := "${WORKSPACE}/:"
 
 SRC_URI = "file://cxm-apps"
 
-inherit autotools
+inherit autotools pkgconfig
 
 inherit proprietary-qcom
 

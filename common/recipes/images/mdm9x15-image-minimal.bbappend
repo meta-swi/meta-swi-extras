@@ -45,7 +45,7 @@ generate_cwe_pid() {
     if [[ "$ROOTFS_IMAGE" == "true" ]]; then
         ROOTFS_IMG="${DEPLOY_DIR_IMAGE}/mdm9x15-image-minimal-swi-mdm9x15.${PAGE_SIZE}.default"
         if ! [ -e "$ROOTFS_IMG" ]; then
-            ROOTFS_IMG="${DEPLOY_DIR_IMAGE}/mdm9x15-image-minimal-swi-mdm9x15.${PAGE_SIZE}.yaffs2"
+            ROOTFS_IMG="${DEPLOY_DIR_IMAGE}/mdm9x15-image-minimal-swi-mdm9x15.${PAGE_SIZE}.ubi"
         fi
 
         echo "Rootfs: $ROOTFS_IMG"

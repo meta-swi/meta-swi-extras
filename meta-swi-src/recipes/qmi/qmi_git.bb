@@ -1,4 +1,4 @@
-inherit autotools
+inherit autotools pkgconfig
 
 DESCRIPTION = "Qualcomm MSM Interface (QMI) Library"
 HOMEPAGE = "http://support.cdmatech.com"
@@ -21,6 +21,8 @@ FILESEXTRAPATHS_prepend := "${WORKSPACE}/:"
 SRC_URI = "file://qmi"
 
 S = "${WORKDIR}/qmi"
+
+EXTRA_OEMAKE = "INCLUDES='-I${S}/core/lib/inc -I${S}/{src,inc,platform,proxy,services} -I${S}/tests/wmsts'"
 
 INITSCRIPT_NAME = "qmuxd"
 INITSCRIPT_PARAMS = "start 40 S . stop 60 S ."

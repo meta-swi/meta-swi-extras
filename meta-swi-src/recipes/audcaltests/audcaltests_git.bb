@@ -13,7 +13,7 @@ S = "${WORKDIR}/test"
 
 EXTRA_OECONF += "--with-sanitized-headers=${STAGING_KERNEL_DIR}/include \
                  --with-glib"
-inherit autotools
+inherit autotools pkgconfig
 
 inherit proprietary-qcom
 

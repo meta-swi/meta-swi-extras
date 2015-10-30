@@ -1,4 +1,4 @@
-inherit autotools
+inherit autotools pkgconfig
 
 DESCRIPTION = "Audio Caliberation Library"
 LICENSE = "QUALCOMM-Proprietary"
@@ -15,5 +15,7 @@ S = "${WORKDIR}/audcal"
 
 EXTRA_OECONF += "--with-sanitized-headers=${STAGING_KERNEL_DIR}/include \
                  --with-glib"
+
+EXTRA_OEMAKE = "INCLUDES='-I${srcdir}/../inc -I${srcdir}/../../../8960/acdbdata/inc -I${srcdir}/../../acdbdata/inc -I${srcdir}/../../acph/inc -I${srcdir}/../../audtp/{src,inc} -I${srcdir}/../../actp/inc'"
 
 inherit proprietary-qcom

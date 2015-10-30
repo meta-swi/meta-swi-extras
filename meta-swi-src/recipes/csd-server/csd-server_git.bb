@@ -1,4 +1,4 @@
-inherit autotools
+inherit autotools pkgconfig
 
 DESCRIPTION = "CSD QMI Server"
 LICENSE = "QUALCOMM-Proprietary"
@@ -15,6 +15,8 @@ S = "${WORKDIR}/csd-server"
 
 EXTRA_OECONF += "--with-sanitized-headers=${STAGING_KERNEL_DIR}/include \
                  --with-glib"
+
+EXTRA_OEMAKE += " INCLUDES='-I${S}/inc' "
 
 #INITSCRIPT_NAME = "csdserver"
 #INITSCRIPT_PARAMS = "start 45 2 3 4 5 . stop 80 0 1 6 ."

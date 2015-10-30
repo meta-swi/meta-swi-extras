@@ -1,4 +1,4 @@
-inherit autotools
+inherit autotools pkgconfig
 
 DESCRIPTION = "Qualcomm XML Library"
 HOMEPAGE = "http://support.cdmatech.com"
@@ -16,6 +16,8 @@ FILESEXTRAPATHS_prepend := "${WORKSPACE}/:"
 
 SRC_URI = "file://xmllib"
 S = "${WORKDIR}/xmllib"
+
+EXTRA_OEMAKE = "INCLUDES='-I${S}/inc'"
 
 inherit proprietary-qcom
 

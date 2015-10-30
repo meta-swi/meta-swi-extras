@@ -1,4 +1,4 @@
-inherit autotools
+inherit autotools pkgconfig
 DESCRIPTION = "Audio FTM"
 LICENSE = "QUALCOMM-Proprietary"
 PR = "r1"
@@ -13,6 +13,8 @@ S = "${WORKDIR}/audio_ftm"
 EXTRA_OECONF += "--with-common-includes=${STAGING_INCDIR} \
                  --with-sanitized-headers=${STAGING_KERNEL_DIR}/include \
                  --with-glib"
+
+EXTRA_OEMAKE = " INCLUDES='-I${S}/inc' "
 
 inherit proprietary-qcom
 

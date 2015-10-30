@@ -1,4 +1,4 @@
-inherit autotools
+inherit autotools pkgconfig
 
 DESCRIPTION = "Qualcomm Data Modules (Excluding ConfigDB and DSUtils)"
 HOMEPAGE = "http://support.cdmatech.com"
@@ -14,7 +14,7 @@ EXTRA_OECONF = "--with-lib-path=${STAGING_LIBDIR} \
                 --with-glib \
                 --with-qxdm \
                 --enable-target=9615-cdp \
-                WORKSPACE='${WORKSPACE}' \
+                WORKSPACE="${WORKSPACE}" \
                 "
 export GLIB_LIBS="-lrt"
 
@@ -28,6 +28,17 @@ SRC_URI = " \
             "
 
 S = "${WORKDIR}/data"
+
+# DM, FIXME: There are two ps_svc.h files:
+#     dss_new/src/platform/inc/ps_svc.h
+#     dss_new/inc/ps_svc.h
+# ${srcdir}/../inc should resolve it all, but it does not, because
+# dss_new/src/platform/inc/ps_svc.h never gets included. Later contains
+# ps_set_cmd_handler and ps_send_cmd methods which need to be in one of the
+# so libs. The real question is, if incorrect content could be delivered
+# to the compiled file (dss_new/src/platform/inc/ps_svc.h would always
+# resolve first).
+EXTRA_OEMAKE += "INCLUDES='-I${S}/dss_new/src/platform/inc -I${srcdir}/../inc -I${S}/dsi_netctrl/inc -I${S}/netmgr/inc/ -I${S}/qdi/inc/'"
 
 FILES_${PN}-dbg += "/tmp/tests/.debug"
 FILES_${PN} += "/tmp"

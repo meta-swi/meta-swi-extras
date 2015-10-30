@@ -11,6 +11,7 @@ this_e=$( basename $0 )
 flash_mntpt_g=${UFS_ROOT}
 root_etc_g=/etc
 root_data_g=/data
+ufs_type=${UFS_T}
 
 # Returns SWI_TRUE if unionfs should fudge rootfs.
 is_fudge_ro_rootfs_allowed()
@@ -41,7 +42,7 @@ mount_unionfs_start()
 
     # Try to make /etc writable.
     mkdir -p ${flash_mntpt_g}${root_etc_g}
-    mount -t unionfs -o dirs=${flash_mntpt_g}${root_etc_g}=rw:${root_etc_g}=ro unionfs ${root_etc_g}
+    mount -t ${ufs_type} -o dirs=${flash_mntpt_g}${root_etc_g}=rw:${root_etc_g}=ro ${ufs_type} ${root_etc_g}
     if [ $? -ne 0 ] ; then
         swi_log "Unable to mount unionfs file system (${flash_mntpt_g}${root_etc_g}=rw, ${root_etc_g}=ro, union=${root_etc_g})."
         return ${SWI_ERR}
@@ -49,7 +50,7 @@ mount_unionfs_start()
 
     # Try to make /data writable
     mkdir -p ${flash_mntpt_g}${root_data_g}
-    mount -t unionfs -o dirs=${flash_mntpt_g}${root_data_g}=rw:${root_data_g}=ro unionfs ${root_data_g}
+    mount -t ${ufs_type} -o dirs=${flash_mntpt_g}${root_data_g}=rw:${root_data_g}=ro ${ufs_type} ${root_data_g}
     if [ $? -ne 0 ] ; then
         swi_log "Unable to mount unionfs file system (${flash_mntpt_g}${root_data_g}=rw, ${root_data_g}=ro, union=${root_data_g})."
         umount -l ${root_etc_g}

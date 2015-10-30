@@ -1,4 +1,4 @@
-inherit autotools
+inherit autotools pkgconfig
 
 DESCRIPTION = "acdb mapper Library"
 LICENSE = "QUALCOMM-Proprietary"
@@ -14,6 +14,8 @@ S = "${WORKDIR}/acdb-mapper"
 
 EXTRA_OECONF += "--with-sanitized-headers=${STAGING_KERNEL_HEADERS} \
                  --with-glib"
+
+EXTRA_OEMAKE = "INCLUDES='-I${S}/inc'"
 
 inherit proprietary-qcom
 

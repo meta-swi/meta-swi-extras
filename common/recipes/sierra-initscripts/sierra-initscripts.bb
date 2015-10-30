@@ -38,7 +38,7 @@ do_install() {
     update-rc.d $OPT -f mount_unionfs remove
     update-rc.d $OPT mount_unionfs start 04 S . stop 96 S .
     update-rc.d $OPT -f swiapplaunch.sh remove
-    update-rc.d $OPT swiapplaunch.sh start 80 S . stop 20 S .
+    update-rc.d $OPT swiapplaunch.sh start 31 S . stop 69 S .
     update-rc.d $OPT -f varrw.sh remove
     update-rc.d $OPT varrw.sh start 36 S . stop 64 S .
     update-rc.d $OPT -f enable_autosleep.sh remove
